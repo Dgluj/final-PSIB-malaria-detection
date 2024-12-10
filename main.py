@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from src.carga_imagenes import cargar_imagenes
-from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_menor_contraste, aplicar_wavelet
+from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_menor_contraste, aplicar_fft, aplicar_wavelet
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
 
 def main():

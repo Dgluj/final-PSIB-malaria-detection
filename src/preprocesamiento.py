@@ -80,7 +80,7 @@ def aplicar_fft(canal):
     plt.imshow(espectro, cmap='gray')
     plt.axis('off')
     plt.tight_layout()
-    plt.show()
+    plt.show() 
 
 def aplicar_wavelet(canal):
     """
