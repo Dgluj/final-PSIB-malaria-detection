@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_menor_contraste, aplicar_fft, aplicar_wavelet
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
+from src.watershed import binarizar, aplicar_watershed
 
 def main():
     imagenes = cargar_imagenes()
@@ -115,6 +116,15 @@ def main():
 
         plt.tight_layout()
         plt.show()
+
+        # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
+        img_binarizada = binarizar(imagen_wavelet, 215)
+
+        # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
+        img_completa_ws = aplicar_watershed(img_binarizada,80)
+
+        # Aplicar la transformada de la distancia y Watershed a la imagen de potenciales células infectadas (img_infectadas)
+        img_infectadas_ws = aplicar_watershed(img_infectadas, 20)
 
 if __name__ == "__main__":
     main()
