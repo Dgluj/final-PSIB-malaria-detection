@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_menor_contraste, aplicar_wavelet
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
-import matplotlib.pyplot as plt
 
 def main():
     imagenes = cargar_imagenes()
@@ -19,6 +19,9 @@ def main():
         canal_rojo, canal_verde, canal_azul = separar_canales(img_denoised)
         canal_seleccionado = seleccionar_canal_menor_contraste(canal_rojo, canal_verde, canal_azul)
         
+        # Analizar el espectro de frecuencias del canal seleccionado
+        aplicar_fft(canal_seleccionado)
+
         # Aplicar la Transformada Wavelet
         imagen_wavelet = aplicar_wavelet(canal_seleccionado)
 
