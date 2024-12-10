@@ -69,18 +69,18 @@ def aplicar_fft(canal):
     f_centrada = np.fft.fftshift(f_transformada)  # Centrar frecuencias bajas en el centro del espectro
     espectro = np.log(1 + np.abs(f_centrada))
 
-    # Graficar el canal original y el espectro de frecuencias
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.title("Canal Seleccionado")
-    plt.imshow(canal, cmap='gray')
-    plt.axis('off')
-    plt.subplot(1, 2, 2)
-    plt.title("Espectro de Frecuencias (FFT)")
-    plt.imshow(espectro, cmap='gray')
-    plt.axis('off')
-    plt.tight_layout()
-    plt.show() 
+    # # Graficar el canal original y el espectro de frecuencias
+    # plt.figure(figsize=(10, 5))
+    # plt.subplot(1, 2, 1)
+    # plt.title("Canal Seleccionado")
+    # plt.imshow(canal, cmap='gray')
+    # plt.axis('off')
+    # plt.subplot(1, 2, 2)
+    # plt.title("Espectro de Frecuencias (FFT)")
+    # plt.imshow(espectro, cmap='gray')
+    # plt.axis('off')
+    # plt.tight_layout()
+    # plt.show() 
 
 def aplicar_wavelet(canal):
     """

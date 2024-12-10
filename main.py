@@ -118,7 +118,7 @@ def main():
         plt.show()
 
         # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
-        img_binarizada = binarizar(imagen_wavelet, 215)
+        img_binarizada = binarizar(imagen_wavelet, 220)
 
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
         img_completa_ws = aplicar_watershed(img_binarizada,80)
