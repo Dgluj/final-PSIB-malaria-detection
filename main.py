@@ -102,29 +102,29 @@ def main():
 
         plt.figure(figsize=(10, 10))
         plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
-        plt.title("Bounding Boxes")
+        plt.title("Bounding Boxes" + nombre)
         plt.axis("off")
         plt.show()
 
-        # Llamar al pipeline de segmentación y bounding boxes de recortes
-        img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_max=20000, umbral_area_min=5000)
+        # # Llamar al pipeline de segmentación y bounding boxes de recortes
+        # img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_max=20000, umbral_area_min=5000)
 
-        # Mostrar la comparación entre los bounding boxes previos y los nuevos
-        fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+        # # Mostrar la comparación entre los bounding boxes previos y los nuevos
+        # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
 
-        # Mostrar imagen con bounding boxes previos
-        axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
-        axs[0].set_title("Bounding Boxes Previos" + nombre)
-        axs[0].axis('off')
+        # # Mostrar imagen con bounding boxes previos
+        # axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
+        # axs[0].set_title("Bounding Boxes Previos" + nombre)
+        # axs[0].axis('off')
 
-        # Mostrar imagen con nuevos bounding boxes
-        axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
-        axs[1].set_title("Nuevos Bounding Boxes" + nombre)
-        axs[1].axis('off')
+        # # Mostrar imagen con nuevos bounding boxes
+        # axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
+        # axs[1].set_title("Nuevos Bounding Boxes" + nombre)
+        # axs[1].axis('off')
 
-        # Ajustar el layout y mostrar
-        plt.tight_layout()
-        plt.show()
+        # # Ajustar el layout y mostrar
+        # plt.tight_layout()
+        # plt.show()
 
         # Construir base de datos
         df = construir_base_datos(canal_seleccionado, contornos)
@@ -133,9 +133,9 @@ def main():
         print("Base de datos de características:", nombre)
         print(df)
 
-        # Detenerse después de procesar la primera imagen
-        if nombre == "5.png":
-            break
+        # # Detenerse después de procesar la primera imagen
+        # if nombre == "5.png":
+        #     break
 
 if __name__ == "__main__":
     main()
