@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
-from src.watershed import binarizar, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
+from src.watershed import binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
 
 def main():
     imagenes = cargar_imagenes()
@@ -50,12 +50,13 @@ def main():
         # plt.show()
 
         # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
-        img_binarizada = binarizar(canal_ecualizado, 100)
+        #img_binarizada = binarizar(canal_ecualizado, 100)
+        img_binarizada = binarizar_auto(canal_ecualizado) #checkinggggggggggg
 
         img_dilatada, img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
 
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
-        img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=150)
+        img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga todo
 
         # Mostrar los resultados intermedios
         fig, ax = plt.subplots(2, 2, figsize=(10, 10))
@@ -79,27 +80,33 @@ def main():
         contornos, _ = cv2.findContours(img_ws, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Llamar a la función para dibujar los bounding boxes
-        img_bounding_boxes = dibujar_bounding_boxes(canal_ecualizado, contornos, color=(0, 255, 0), grosor=1)
+        img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1, umbral_area_minima=500)
 
-        # Llamar al pipeline
-        img_bounding_boxes_final = segmentar_recortes(canal_ecualizado, img_ws, contornos, level=30, umbral_area_minima=800)
-
-        # Mostrar la comparación entre los bounding boxes previos y los nuevos
-        fig, axs = plt.subplots(1, 2, figsize=(15, 7))
-
-        # Mostrar imagen con bounding boxes previos
-        axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
-        axs[0].set_title("Bounding Boxes Previos")
-        axs[0].axis('off')
-
-        # Mostrar imagen con nuevos bounding boxes
-        axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
-        axs[1].set_title("Nuevos Bounding Boxes")
-        axs[1].axis('off')
-
-        # Ajustar el layout y mostrar
-        plt.tight_layout()
+        plt.figure(figsize=(10, 10))
+        plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
+        plt.title("Bounding Boxes")
+        plt.axis("off")
         plt.show()
+
+        # # Llamar al pipeline
+        # img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_minima=1000)
+
+        # # Mostrar la comparación entre los bounding boxes previos y los nuevos
+        # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+
+        # # Mostrar imagen con bounding boxes previos
+        # axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
+        # axs[0].set_title("Bounding Boxes Previos")
+        # axs[0].axis('off')
+
+        # # Mostrar imagen con nuevos bounding boxes
+        # axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
+        # axs[1].set_title("Nuevos Bounding Boxes")
+        # axs[1].axis('off')
+
+        # # Ajustar el layout y mostrar
+        # plt.tight_layout()
+        # plt.show()
 
 if __name__ == "__main__":
     main()
