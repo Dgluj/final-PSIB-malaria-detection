@@ -103,7 +103,7 @@ def aplicar_dilatacion_y_erosion(img_binarizada, kernel_size=(3, 3), iterations=
 
     return img_dilated, img_eroded
 
-def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1, umbral_area_minima=400):
+def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1):
     """
     Dibuja bounding boxes alrededor de los contornos especificados en una imagen.
 
@@ -124,70 +124,12 @@ def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1, umbra
 
     # Dibujar los bounding boxes en la imagen
     for contorno in contornos:
-        if cv2.contourArea(contorno) > umbral_area_minima:  # Filtro de área mínima
-            x, y, w, h = cv2.boundingRect(contorno)
-            cv2.rectangle(img_bboxes, (x, y), (x + w, y + h), color, grosor)
+        x, y, w, h = cv2.boundingRect(contorno)
+        cv2.rectangle(img_bboxes, (x, y), (x + w, y + h), color, grosor)
 
     return img_bboxes
 
-# def procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, level=30, umbral_area_minima=800, filas=5, columnas=5):
-#     """
-#     Procesa cada recorte generado por los bounding boxes, aplica watershed y dibuja los resultados.
-    
-#     Args:
-#         imagen_ws (numpy.ndarray): Imagen binaria procesada por watershed.
-#         contornos (list): Contornos detectados en la imagen original.
-#         img_original_bgr (numpy.ndarray): Imagen original en formato BGR.
-#         level (int): Nivel para el algoritmo Watershed.
-#         umbral_area_minima (int): Área mínima para considerar un contorno válido.
-#         filas (int): Número de filas para la cuadrícula de visualización.
-#         columnas (int): Número de columnas para la cuadrícula de visualización.
-        
-#     Returns:
-#         img_original_bgr (numpy.ndarray): Imagen original con los nuevos bounding boxes dibujados.
-#     """
-#     resultados_watershed = []
-
-#     # Iterar sobre los contornos y procesar los recortes
-#     for i, contorno in enumerate(contornos):
-#         x, y, w, h = cv2.boundingRect(contorno)  # Obtener bounding box
-#         recorte = imagen_ws[y:y+h, x:x+w]       # Recortar región de interés
-
-#         # Aplicar watershed al recorte
-#         watershed_array = aplicar_watershed(recorte, level=level)
-
-#         # Detectar contornos en el resultado del watershed
-#         contornos_recorte, _ = cv2.findContours(watershed_array, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-#         contornos_filtrados = [c for c in contornos_recorte if cv2.contourArea(c) > umbral_area_minima]
-
-#         # Dibujar bounding boxes sobre la imagen original
-#         for c in contornos_filtrados:
-#             x_recorte, y_recorte, w_recorte, h_recorte = cv2.boundingRect(c)
-#             cv2.rectangle(img_original_bgr, (x + x_recorte, y + y_recorte), 
-#                           (x + x_recorte + w_recorte, y + y_recorte + h_recorte), (0, 255, 0), 1)
-
-#         # Almacenar el resultado del watershed
-#         resultados_watershed.append(watershed_array)
-
-#         # Mostrar en cuadrícula cada recorte procesado
-#         if i % (filas * columnas) == 0:
-#             if i > 0:
-#                 plt.tight_layout()
-#                 plt.show()
-#             fig, axs = plt.subplots(filas, columnas, figsize=(15, 15))
-#             axs = axs.ravel()
-
-#         axs[i % (filas * columnas)].imshow(watershed_array, cmap='gray')
-#         axs[i % (filas * columnas)].set_title(f'Recorte {i+1}')
-#         axs[i % (filas * columnas)].axis('off')
-
-#     # Mostrar la última figura
-#     plt.tight_layout()
-#     plt.show()
-
-#     return img_original_bgr
-
-def procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, level=30, umbral_area_max=800, filas=5, columnas=5):
+def procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, level=30, umbral_area_max=1500, umbral_area_min=800):
     """
     Procesa cada recorte generado por los bounding boxes, aplica watershed y dibuja los resultados.
     
@@ -198,8 +140,7 @@ def procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, level=
         level (int): Nivel para el algoritmo Watershed.
         umbral_area_minima (int): Área mínima para considerar un contorno válido.
         filas (int): Número de filas para la cuadrícula de visualización.
-        columnas (int): Número de columnas para la cuadrícula de visualización.
-        
+
     Returns:
         img_original_bgr (numpy.ndarray): Imagen original con los nuevos bounding boxes dibujados.
     """
@@ -215,26 +156,34 @@ def procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, level=
 
         # **Convertir watershed_array a formato binario y uint8**
         watershed_array = (watershed_array > 0).astype(np.uint8) * 255
+        # Asegúrate de que la imagen esté en el tipo adecuado
+        watershed_recorte = sitk.GetImageFromArray(watershed_array)
+        
+        # **Aquí es donde se corrige la advertencia**
+        watershed_recorte = sitk.Cast(watershed_recorte, sitk.sitkUInt8)  # Convertir explícitamente a sitkUInt8
+
+        # Convertir watershed_recorte de SimpleITK a numpy.ndarray
+        watershed_recorte_array = sitk.GetArrayFromImage(watershed_recorte)
 
         # Detectar contornos en el resultado del watershed
-        contornos_recorte, _ = cv2.findContours(watershed_array, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contornos_recorte, _ = cv2.findContours(watershed_recorte_array, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Filtrar contornos por área mínima
-        contornos_filtrados = [c for c in contornos_recorte if cv2.contourArea(c) > umbral_area_max]
+        contornos_filtrados = [c for c in contornos_recorte if (umbral_area_max > cv2.contourArea(c) > umbral_area_min)]
 
         # Dibujar bounding boxes sobre la imagen original
         for c in contornos_filtrados:
             x_recorte, y_recorte, w_recorte, h_recorte = cv2.boundingRect(c)
             cv2.rectangle(img_original_bgr, (x + x_recorte, y + y_recorte),
-                          (x + x_recorte + w_recorte, y + y_recorte + h_recorte), (0, 255, 0), 1)
+                          (x + x_recorte + w_recorte, y + y_recorte + h_recorte), (255, 0, 0), 1)
 
         # Almacenar el resultado del watershed
-        resultados_watershed.append(watershed_array)
+        resultados_watershed.append(watershed_recorte_array)
 
-    return img_original_bgr
+    return img_original_bgr, resultados_watershed
 
 # Uso del pipeline
-def segmentar_recortes(imagen_wavelet, imagen_ws, contornos, level=30, umbral_area_max=800, filas=5, columnas=5):
+def segmentar_recortes(imagen_wavelet, imagen_ws, contornos, level=30, umbral_area_max = 1500, umbral_area_min=800):
     """
     Ejecuta el pipeline completo de procesamiento: watershed, contornos y bounding boxes.
     
@@ -250,12 +199,11 @@ def segmentar_recortes(imagen_wavelet, imagen_ws, contornos, level=30, umbral_ar
     # Convertir la imagen original a formato BGR
     img_original_bgr = cv2.cvtColor(imagen_wavelet, cv2.COLOR_GRAY2BGR)
 
-    # Dibujar los bounding boxes iniciales
-    img_original_bgr = dibujar_bounding_boxes(img_original_bgr, contornos)
+    # # Dibujar los bounding boxes iniciales
+    # img_original_bgr = dibujar_bounding_boxes(img_original_bgr, contornos)
 
     # Procesar recortes y watershed
-    img_con_boxes = procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, 
-                                                  level=level, umbral_area_max=umbral_area_max, 
-                                                  filas=filas, columnas=columnas)
+    img_con_boxes, _ = procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, 
+                                                  level=level, umbral_area_max=umbral_area_max, umbral_area_min=umbral_area_min)
 
     return img_con_boxes

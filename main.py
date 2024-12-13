@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore", message="MaskImageFilter (00000099A95ECB70): Support for pixel type 32-bit unsigned integer for the MaskImage input has been deprecated and will be removed in future versions. Implicitly casting input to support 'sitkUInt8' type.")
+
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
@@ -51,7 +54,7 @@ def main():
         # plt.show()
 
         # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
-        #img_binarizada = binarizar(canal_ecualizado, 100)
+        #img_binarizada = binarizar(canal_ecualizado, 60)
         img_binarizada = binarizar_auto(canal_ecualizado) #checkinggggggggggg
         img_binarizada = img_binarizada.astype(np.uint8)
 
@@ -82,7 +85,7 @@ def main():
         contornos, _ = cv2.findContours(img_ws, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Llamar a la función para dibujar los bounding boxes
-        img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1, umbral_area_minima=500)
+        img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1)
 
         plt.figure(figsize=(10, 10))
         plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
@@ -90,35 +93,28 @@ def main():
         plt.axis("off")
         plt.show()
 
-        # # Llamar al pipeline
-        # img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_minima=1000)
+        # Llamar al pipeline de segmentación y bounding boxes de recortes
+        img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_max=20000, umbral_area_min=5000)
 
-        # # Mostrar la comparación entre los bounding boxes previos y los nuevos
-        # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
+        # Mostrar la comparación entre los bounding boxes previos y los nuevos
+        fig, axs = plt.subplots(1, 2, figsize=(15, 7))
 
-        # # Mostrar imagen con bounding boxes previos
-        # axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
-        # axs[0].set_title("Bounding Boxes Previos")
-        # axs[0].axis('off')
+        # Mostrar imagen con bounding boxes previos
+        axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
+        axs[0].set_title("Bounding Boxes Previos" + nombre)
+        axs[0].axis('off')
 
-        # # Mostrar imagen con nuevos bounding boxes
-        # axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
-        # axs[1].set_title("Nuevos Bounding Boxes")
-        # axs[1].axis('off')
+        # Mostrar imagen con nuevos bounding boxes
+        axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
+        axs[1].set_title("Nuevos Bounding Boxes" + nombre)
+        axs[1].axis('off')
 
-        # # Ajustar el layout y mostrar
-        # plt.tight_layout()
-        # plt.show()
+        # Ajustar el layout y mostrar
+        plt.tight_layout()
+        plt.show()
 
         # Construir base de datos
         df_A = construir_base_datos_plan_A(canal_seleccionado, contornos)
-
-        # Mostrar imagen con bounding boxes
-        plt.figure(figsize=(10, 10))
-        plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
-        plt.title("Bounding Boxes")
-        plt.axis("off")
-        plt.show()
 
         # Mostrar DataFrame
         print("Base de datos de características:", nombre)
