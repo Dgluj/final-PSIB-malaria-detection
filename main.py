@@ -85,7 +85,7 @@ def main():
         contornos, _ = cv2.findContours(img_ws, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Llamar a la función para dibujar los bounding boxes
-        img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1)
+        img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1, umbral_area_min=5000)
 
         plt.figure(figsize=(10, 10))
         plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))

@@ -103,7 +103,7 @@ def aplicar_dilatacion_y_erosion(img_binarizada, kernel_size=(3, 3), iterations=
 
     return img_dilated, img_eroded
 
-def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1):
+def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1, umbral_area_min=800):
     """
     Dibuja bounding boxes alrededor de los contornos especificados en una imagen.
 
@@ -121,9 +121,11 @@ def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1):
         img_bboxes = cv2.cvtColor(imagen, cv2.COLOR_GRAY2BGR)
     else:
         img_bboxes = imagen.copy()  # Copiar la imagen si ya está en BGR
-
+    # Filtrar contornos por área mínima
+    contornos_filtrados = [c for c in contornos if (cv2.contourArea(c) > umbral_area_min)]
+    
     # Dibujar los bounding boxes en la imagen
-    for contorno in contornos:
+    for contorno in contornos_filtrados:
         x, y, w, h = cv2.boundingRect(contorno)
         cv2.rectangle(img_bboxes, (x, y), (x + w, y + h), color, grosor)
 
@@ -198,9 +200,6 @@ def segmentar_recortes(imagen_wavelet, imagen_ws, contornos, level=30, umbral_ar
     """
     # Convertir la imagen original a formato BGR
     img_original_bgr = cv2.cvtColor(imagen_wavelet, cv2.COLOR_GRAY2BGR)
-
-    # # Dibujar los bounding boxes iniciales
-    # img_original_bgr = dibujar_bounding_boxes(img_original_bgr, contornos)
 
     # Procesar recortes y watershed
     img_con_boxes, _ = procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, 
