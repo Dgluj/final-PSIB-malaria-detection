@@ -20,14 +20,14 @@ def main():
         canal_rojo, canal_verde, canal_azul = separar_canales(img_denoised)
         canal_seleccionado = seleccionar_canal_mayor_contraste(canal_rojo, canal_verde, canal_azul)
         
-        # Analizar el espectro de frecuencias del canal seleccionado
-        aplicar_fft(canal_seleccionado)
-
-        # Aplicar la Transformada Wavelet
-        imagen_wavelet = aplicar_wavelet(canal_seleccionado)
+        # # Analizar el espectro de frecuencias del canal seleccionado
+        # aplicar_fft(canal_seleccionado)
 
         # Aplicar ecualizado
-        canal_ecualizado = aplicar_ecualizado(imagen_wavelet)
+        canal_ecualizado = aplicar_ecualizado(canal_seleccionado)
+
+        #  # Aplicar la Transformada Wavelet
+        # canal_ecualizado_wavelet = aplicar_wavelet(canal_ecualizado)
 
         # # Mostrar el resultado
         # plt.figure(figsize=(15, 5))
@@ -52,19 +52,37 @@ def main():
         # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
         img_binarizada = binarizar(canal_ecualizado, 100)
 
-        img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
+        img_dilatada, img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
 
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
-        img_ws = aplicar_watershed(img_cerrada,150)
+        img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=150)
+
+        # Mostrar los resultados intermedios
+        fig, ax = plt.subplots(2, 2, figsize=(10, 10))
+
+        ax[0, 0].imshow(resultados_intermedios['dist_array'], cmap='gray')
+        ax[0, 0].set_title('Transformada de la distancia', fontsize=15)
+
+        ax[0, 1].imshow(resultados_intermedios['umbral_array'], cmap='gray')
+        ax[0, 1].set_title('Imagen binaria', fontsize=15)
+
+        ax[1, 0].imshow(resultados_intermedios['etiquetas_array'], cmap='gray')
+        ax[1, 0].set_title('Etiquetas Watershed', fontsize=15)
+
+        ax[1, 1].imshow(img_ws, cmap='gray')
+        ax[1, 1].set_title('Resultado Watershed', fontsize=15)
+
+        plt.tight_layout()
+        plt.show()
 
         # Detectar contornos
         contornos, _ = cv2.findContours(img_ws, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Llamar a la función para dibujar los bounding boxes
-        img_bounding_boxes = dibujar_bounding_boxes(imagen_wavelet, contornos, color=(0, 255, 0), grosor=1)
+        img_bounding_boxes = dibujar_bounding_boxes(canal_ecualizado, contornos, color=(0, 255, 0), grosor=1)
 
         # Llamar al pipeline
-        img_bounding_boxes_final = segmentar_recortes(imagen_wavelet, img_ws, contornos, level=30, umbral_area_minima=800)
+        img_bounding_boxes_final = segmentar_recortes(canal_ecualizado, img_ws, contornos, level=30, umbral_area_minima=800)
 
         # Mostrar la comparación entre los bounding boxes previos y los nuevos
         fig, axs = plt.subplots(1, 2, figsize=(15, 7))

@@ -12,6 +12,7 @@ def binarizar(imagen, umbral):
         umbral (int): Valor umbral para la binarización (0-255).
     
     Returns:
+        img_binarizada (numpy.darray): Imagen binaria
         img_invertida (numpy.darray): Imagen binaria
     """
     # Binarización: los valores >= umbral se hacen blancos (255), los menores negros (0)
@@ -19,30 +20,6 @@ def binarizar(imagen, umbral):
 
     # Invertir la imagen binarizada
     img_invertida = cv2.bitwise_not(img_binarizada)
-
-    # # Mostrar la imagen original, binarizada e invertida
-    # plt.figure(figsize=(15, 5))
-
-    # # Imagen original
-    # plt.subplot(1, 3, 1)
-    # plt.imshow(imagen_wavelet, cmap="gray")
-    # plt.title("Imagen Wavelet")
-    # plt.axis("off")
-
-    # # Imagen binarizada
-    # plt.subplot(1, 3, 2)
-    # plt.imshow(img_binarizada, cmap="gray")
-    # plt.title("Imagen Binarizada")
-    # plt.axis("off")
-
-    # # Imagen invertida
-    # plt.subplot(1, 3, 3)
-    # plt.imshow(img_invertida, cmap="gray")
-    # plt.title("Imagen Invertida")
-    # plt.axis("off")
-
-    # plt.tight_layout()
-    # plt.show()
 
     return img_invertida
 
@@ -59,6 +36,9 @@ def aplicar_watershed(imagen, level=80):
     """
     # Convertir la imagen binaria a formato SimpleITK
     umbral = sitk.GetImageFromArray(imagen)
+    
+    # **CONVERSIÓN** a `sitkUInt8` para evitar la advertencia
+    umbral = sitk.Cast(umbral, sitk.sitkUInt8)
 
     # Aplicar transformada de la distancia
     dist_transformada = sitk.SignedMaurerDistanceMap(umbral, insideIsPositive=True, useImageSpacing=True)
@@ -73,30 +53,14 @@ def aplicar_watershed(imagen, level=80):
     ws = sitk.Mask(umbral, etiquetas)
 
     # Convertir las imágenes a arrays de numpy para visualización
-    umbral_array = sitk.GetArrayFromImage(umbral)
-    dist_array = sitk.GetArrayFromImage(dist_transformada)
-    etiquetas_array = sitk.GetArrayFromImage(etiquetas)
+    resultados_intermedios = {
+        'umbral_array': sitk.GetArrayFromImage(umbral),
+        'dist_array': sitk.GetArrayFromImage(dist_transformada),
+        'etiquetas_array': sitk.GetArrayFromImage(etiquetas)
+    }
     img_ws = sitk.GetArrayFromImage(ws)
 
-    # Visualizar los resultados
-    fig, ax = plt.subplots(2, 2, figsize=(10, 10))
-
-    ax[0, 0].imshow(dist_array, cmap='gray')
-    ax[0, 0].set_title('Transformada de la distancia', fontsize=15)
-
-    ax[0, 1].imshow(umbral_array, cmap='gray')
-    ax[0, 1].set_title('Imagen binaria', fontsize=15)
-
-    ax[1, 0].imshow(etiquetas_array, cmap='gray')
-    ax[1, 0].set_title('Watershed', fontsize=15)
-
-    ax[1, 1].imshow(img_ws, cmap='gray')
-    ax[1, 1].set_title('Watershed imagen binaria', fontsize=15)
-
-    plt.tight_layout()
-    plt.show()
-
-    return img_ws
+    return img_ws, resultados_intermedios
 
 def aplicar_dilatacion_y_erosion(img_binarizada, kernel_size=(3, 3), iterations=1, mostrar_resultados=True):
     """
@@ -120,32 +84,7 @@ def aplicar_dilatacion_y_erosion(img_binarizada, kernel_size=(3, 3), iterations=
     # Aplicar erosión
     img_eroded = cv2.erode(img_dilated, kernel, iterations=iterations)
 
-    if mostrar_resultados:
-        # Mostrar las imágenes procesadas
-        plt.figure(figsize=(15, 5))
-
-        # Imagen binarizada original
-        plt.subplot(1, 3, 1)
-        plt.imshow(img_binarizada, cmap="gray")
-        plt.title("Imagen Binarizada")
-        plt.axis("off")
-
-        # Imagen dilatada
-        plt.subplot(1, 3, 2)
-        plt.imshow(img_dilated, cmap="gray")
-        plt.title("Imagen Dilatada")
-        plt.axis("off")
-
-        # Imagen erosionada
-        plt.subplot(1, 3, 3)
-        plt.imshow(img_eroded, cmap="gray")
-        plt.title("Imagen Erosionada")
-        plt.axis("off")
-
-        plt.tight_layout()
-        plt.show()
-
-    return img_eroded
+    return img_dilated, img_eroded
 
 def dibujar_bounding_boxes(imagen, contornos, color=(0, 255, 0), grosor=1):
     """
@@ -268,4 +207,5 @@ def segmentar_recortes(imagen_wavelet, imagen_ws, contornos, level=30, umbral_ar
     plt.title("Imagen Original con Nuevos Bounding Boxes")
     plt.axis('off')
     plt.show()
+    
     return img_con_boxes
