@@ -219,21 +219,21 @@ def procesar_recortes_y_watershed(imagen_ws, contornos, img_original_bgr, level=
         # Almacenar el resultado del watershed
         resultados_watershed.append(watershed_array)
 
-        # Mostrar en cuadrícula cada recorte procesado
-        if i % (filas * columnas) == 0:
-            if i > 0:
-                plt.tight_layout()
-                plt.show()
-            fig, axs = plt.subplots(filas, columnas, figsize=(15, 15))
-            axs = axs.ravel()
+    #     # Mostrar en cuadrícula cada recorte procesado
+    #     if i % (filas * columnas) == 0:
+    #         if i > 0:
+    #             plt.tight_layout()
+    #             plt.show()
+    #         fig, axs = plt.subplots(filas, columnas, figsize=(15, 15))
+    #         axs = axs.ravel()
 
-        axs[i % (filas * columnas)].imshow(watershed_array, cmap='gray')
-        axs[i % (filas * columnas)].set_title(f'Recorte {i+1}')
-        axs[i % (filas * columnas)].axis('off')
+    #     axs[i % (filas * columnas)].imshow(watershed_array, cmap='gray')
+    #     axs[i % (filas * columnas)].set_title(f'Recorte {i+1}')
+    #     axs[i % (filas * columnas)].axis('off')
 
-    # Mostrar la última figura
-    plt.tight_layout()
-    plt.show()
+    # # Mostrar la última figura
+    # plt.tight_layout()
+    # plt.show()
 
     return img_original_bgr
 
