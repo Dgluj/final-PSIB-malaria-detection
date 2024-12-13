@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from src.carga_imagenes import cargar_imagenes
-from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado
+from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
 from src.watershed import binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
 from src.extraccion_de_caracteristicas import construir_base_datos
@@ -15,18 +15,32 @@ def main():
         print(f"- {nombre}")
 
     for nombre, img in imagenes.items():
-        # Reducir ruido
-        img_denoised = reducir_ruido(img)
-        
-        # Separar canales y seleccionar el de menor contraste
-        canal_rojo, canal_verde, canal_azul = separar_canales(img_denoised)
+        # Reducir el ruido y convertir la imagen a RGB
+        img_filtered, img_rgb = reducir_ruido(img)
+
+        # Separar los canales de la imagen filtrada
+        canal_rojo, canal_verde, canal_azul = separar_canales(img_rgb)
+        # Seleccionar el canal de mayor contraste
         canal_seleccionado = seleccionar_canal_mayor_contraste(canal_rojo, canal_verde, canal_azul)
-        
-        # # Analizar el espectro de frecuencias del canal seleccionado
-        # aplicar_fft(canal_seleccionado)
+
+        # Binarizar la imagen del canal de mayor contraste usando KMeans
+        img_binarizada = binarizar_con_kmeans(canal_seleccionado)
+
+        # Aplicar filtro de mediana para suavizar la imagen binarizada
+        img_mediana = aplicar_filtro_mediana(img_binarizada)
+
+        # Aplicar operaciones morfológicas (dilatación y erosión)
+        img_morfo = aplicar_operaciones_morfologicas(img_mediana)
+
+        # Morfología cierre morfológico directo
+        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))  # Ajusta el tamaño del kernel según sea necesario
+        # img_closing = cv2.morphologyEx(img_binarizada_mediana, cv2.MORPH_CLOSE, kernel)
+
+        # Rellenar las células
+        img_rellena = rellenar_celulas(img_morfo)
 
         # Aplicar ecualizado
-        canal_ecualizado = aplicar_ecualizado(canal_seleccionado, nombre)
+        # canal_ecualizado = aplicar_ecualizado(canal_seleccionado, nombre)
 
         #  # Aplicar la Transformada Wavelet
         # canal_ecualizado_wavelet = aplicar_wavelet(canal_ecualizado)
@@ -53,13 +67,14 @@ def main():
 
         # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
         #img_binarizada = binarizar(canal_ecualizado, 60)
-        img_binarizada = binarizar_auto(canal_ecualizado) #checkinggggggggggg
-        img_binarizada = img_binarizada.astype(np.uint8)
+        #img_binarizada = binarizar_auto(canal_ecualizado) #checkinggggggggggg
+        #img_binarizada = img_binarizada.astype(np.uint8)
 
-        img_dilatada, img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
+        #img_dilatada, img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
 
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
-        img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga
+        # img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga
+        img_ws, resultados_intermedios = aplicar_watershed(img_rellena, level=40) # No achicar mas xq se caga
 
         # Mostrar los resultados intermedios
         fig, ax = plt.subplots(2, 2, figsize=(10, 10))
