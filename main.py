@@ -52,11 +52,12 @@ def main():
         # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
         #img_binarizada = binarizar(canal_ecualizado, 100)
         img_binarizada = binarizar_auto(canal_ecualizado) #checkinggggggggggg
+        img_binarizada = img_binarizada.astype(np.uint8)
 
         img_dilatada, img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
 
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
-        img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga todo
+        img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga
 
         # Mostrar los resultados intermedios
         fig, ax = plt.subplots(2, 2, figsize=(10, 10))

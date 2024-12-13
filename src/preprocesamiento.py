@@ -147,3 +147,94 @@ def aplicar_ecualizado(imagen_wavelet, mostrar_resultados=True):
         plt.show()
 
     return canal_ecualizado
+
+def escalar_con_clipping(imagen, low=0, high=255):
+    """
+    Escala las intensidades de una imagen a un rango definido y aplica clipping.
+
+    Args:
+        imagen (numpy.ndarray): Imagen de entrada en escala de grises.
+        low (int): Valor mínimo del rango deseado.
+        high (int): Valor máximo del rango deseado.
+
+    Returns:
+        numpy.ndarray: Imagen escalada y ajustada al rango especificado.
+    """
+    # Convertir a float para evitar pérdida de precisión durante los cálculos
+    imagen_float = imagen.astype(np.float32)
+
+    # Normalizar las intensidades a [0, 1]
+    imagen_normalizada = (imagen_float - imagen_float.min()) / (imagen_float.max() - imagen_float.min())
+
+    # Escalar al rango deseado
+    imagen_escalada = imagen_normalizada * (high - low) + low
+
+    # Aplicar clipping para asegurar que esté dentro del rango [low, high]
+    imagen_clipped = np.clip(imagen_escalada, low, high)
+
+    return imagen_clipped.astype(np.uint8)
+
+
+def seleccionar_y_preprocesar(imagen, mostrar_resultados=True):
+    """
+    Analiza las características de la imagen y selecciona el mejor método de preprocesamiento.
+
+    Args:
+        imagen (numpy.ndarray): Imagen en escala de grises.
+        mostrar_resultados (bool): Si es True, muestra los gráficos del proceso (por defecto True).
+
+    Returns:
+        str: Método seleccionado ("original", "ecualizado", "escalado").
+        numpy.ndarray: Imagen preprocesada.
+    """
+    # Métricas de la imagen
+    std_dev = np.std(imagen)  # Desviación estándar
+    rango_dinamico = np.max(imagen) - np.min(imagen)  # Rango dinámico
+
+    # Decisiones basadas en las métricas
+    if rango_dinamico < 150:  # Rango estrecho
+        metodo = "escalado"
+        imagen_preprocesada = cv2.normalize(imagen, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+    elif 150 < rango_dinamico < 155:  # Baja variabilidad
+        metodo = "ecualizado"
+        imagen_preprocesada = cv2.equalizeHist(imagen.astype('uint8'))
+    else:  # Imagen con buen contraste ya
+        metodo = "original"
+        imagen_preprocesada = imagen
+
+    # Mostrar resultados si se requiere
+    if mostrar_resultados:
+        plt.figure(figsize=(15, 10))
+
+        # Imagen original
+        plt.subplot(2, 2, 1)
+        plt.imshow(imagen, cmap='gray')
+        plt.title("Imagen Original")
+        plt.axis('off')
+
+        # Histograma de la imagen original
+        plt.subplot(2, 2, 2)
+        plt.hist(imagen.ravel(), bins=256, range=(0, 255), color='blue')
+        plt.grid(True, linestyle='--', alpha=0.6)
+        plt.title("Histograma - Imagen Original")
+        plt.xlabel("Intensidad de los píxeles")
+        plt.ylabel("Cantidad de píxeles")
+
+        # Imagen preprocesada
+        plt.subplot(2, 2, 3)
+        plt.imshow(imagen_preprocesada, cmap='gray')
+        plt.title(f"Imagen Preprocesada ({metodo.capitalize()})")
+        plt.axis('off')
+
+        # Histograma de la imagen preprocesada
+        plt.subplot(2, 2, 4)
+        plt.hist(imagen_preprocesada.ravel(), bins=256, range=(0, 255), color='blue')
+        plt.grid(True, linestyle='--', alpha=0.6)
+        plt.title(f"Histograma - Imagen Preprocesada ({metodo.capitalize()})")
+        plt.xlabel("Intensidad de los píxeles")
+        plt.ylabel("Cantidad de píxeles")
+
+        plt.tight_layout()
+        plt.show()
+
+    return metodo, imagen_preprocesada
