@@ -15,7 +15,7 @@ def reducir_ruido(img):
     """
     imagen_suavizada = cv2.GaussianBlur(img, (5, 5), 0)
     img_bgr = cv2.cvtColor(imagen_suavizada, cv2.COLOR_RGB2BGR)
-    img_denoised = cv2.fastNlMeansDenoisingColored(img_bgr, None, 10, 10, 5, 21)
+    img_denoised = cv2.fastNlMeansDenoisingColored(img_bgr, None, 10, 10, 7, 21)
     img_rgb_denoised = cv2.cvtColor(img_denoised, cv2.COLOR_BGR2RGB)
     return img_rgb_denoised
 
