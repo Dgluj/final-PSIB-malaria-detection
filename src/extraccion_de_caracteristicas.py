@@ -2,16 +2,12 @@ import cv2
 import numpy as np
 import pandas as pd
 from skimage.feature import graycomatrix, graycoprops 
-from pyfeats import glcm_features
 
-# Plan A
 def calcular_glcm(imagen):
     """
     Calcula la matriz GLCM y sus propiedades (contraste, energía, homogeneidad).
-
     Args:
         imagen (numpy.ndarray): Imagen en escala de grises.
-
     Returns:
         dict: Diccionario con las propiedades de la GLCM.
     """
@@ -45,7 +41,6 @@ def construir_base_datos(canal_seleccionado, contornos):
     for i, contorno in enumerate(contornos):
         x, y, w, h = cv2.boundingRect(contorno)
         recorte = canal_seleccionado[y:y+h, x:x+w]
-
 
         if recorte.size > 0 and np.any(recorte):
             caracteristicas = calcular_glcm(recorte)

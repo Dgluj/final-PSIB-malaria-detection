@@ -4,33 +4,28 @@ import matplotlib.pyplot as plt
 
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
-from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
-from src.watershed import binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
+from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas, binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
 from src.extraccion_de_caracteristicas import construir_base_datos
 
 def main():
+    # Cargar una imagen a través de la futura interfaz gráfica (placeholder):
+    # Por ahora, llamamos a una función que podría simular la carga de una única imagen desde el usuario.
+    # En caso de no tener GUI implementada aún, podemos cargar una imagen específica de data/.
+    # img, nombre = cargar_imagen_desde_GUI()  # Cuando esté la GUI
+    # Por ahora, cargamos una imagen directamente:
     imagenes = cargar_imagenes()
-    print(f"Se cargaron {len(imagenes)} imágenes:")
-    for nombre in imagenes.keys():
-        print(f"- {nombre}")
+    # print(f"Se cargaron {len(imagenes)} imágenes:")
+    # for nombre in imagenes.keys():
+    #     print(f"- {nombre}")
 
-    for nombre, img in imagenes.items():
-        # Reducir el ruido y convertir la imagen a RGB
-        img_filtered, img_rgb = reducir_ruido(img)
-
-        # Separar los canales de la imagen filtrada
-        canal_rojo, canal_verde, canal_azul = separar_canales(img_rgb)
-        # Seleccionar el canal de mayor contraste
+    for nombre, img in imagenes.items(): 
+        img_filtered, img_rgb = reducir_ruido(img) # Reducir el ruido y convertir la imagen a RGB
+        canal_rojo, canal_verde, canal_azul = separar_canales(img_rgb) # Separar los canales de la imagen filtrada
         canal_seleccionado = seleccionar_canal_mayor_contraste(canal_rojo, canal_verde, canal_azul)
 
-        # Binarizar la imagen del canal de mayor contraste usando KMeans
-        img_binarizada = binarizar_con_kmeans(canal_seleccionado)
-
-        # Aplicar filtro de mediana para suavizar la imagen binarizada
-        img_mediana = aplicar_filtro_mediana(img_binarizada)
-
-        # Aplicar operaciones morfológicas (dilatación y erosión)
-        img_morfo = aplicar_operaciones_morfologicas(img_mediana)
+        img_binarizada = binarizar_con_kmeans(canal_seleccionado) # Binarizar la imagen del canal de mayor contraste usando KMeans
+        img_mediana = aplicar_filtro_mediana(img_binarizada) # Aplicar filtro de mediana para suavizar la imagen binarizada
+        img_morfo = aplicar_operaciones_morfologicas(img_mediana) # Aplicar operaciones morfológicas (dilatación y erosión)
 
         # Morfología cierre morfológico directo
         # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))  # Ajusta el tamaño del kernel según sea necesario
