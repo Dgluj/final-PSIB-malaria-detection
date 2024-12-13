@@ -13,7 +13,8 @@ def reducir_ruido(img):
     Returns:
         numpy.ndarray: Imagen filtrada.
     """
-    img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    imagen_suavizada = cv2.GaussianBlur(img, (5, 5), 0)
+    img_bgr = cv2.cvtColor(imagen_suavizada, cv2.COLOR_RGB2BGR)
     img_denoised = cv2.fastNlMeansDenoisingColored(img_bgr, None, 10, 10, 5, 21)
     img_rgb_denoised = cv2.cvtColor(img_denoised, cv2.COLOR_BGR2RGB)
     return img_rgb_denoised
@@ -97,19 +98,20 @@ def aplicar_wavelet(canal):
     imagen_wavelet = cv2.normalize(LL, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)
     return imagen_wavelet
 
-def aplicar_ecualizado(imagen_wavelet, mostrar_resultados=True):
+def aplicar_ecualizado(imagen, nombre="Canal", mostrar_resultados=True):
     """
     Aplica la ecualización de histograma a una imagen y muestra los resultados junto con los histogramas.
 
     Args:
-        imagen_wavelet (numpy.ndarray): Imagen de entrada en escala de grises.
+        imagen (numpy.ndarray): Imagen de entrada en escala de grises.
+        nombre (str): Nombre del canal para identificarlo en los resultados.
         mostrar_resultados (bool): Si es True, muestra las imágenes y los histogramas (por defecto True).
 
     Returns:
         numpy.ndarray: Imagen ecualizada.
     """
     # Ecualización del canal seleccionado
-    canal_ecualizado = cv2.equalizeHist(imagen_wavelet.astype('uint8'))
+    canal_ecualizado = cv2.equalizeHist(imagen.astype('uint8'))
 
     if mostrar_resultados:
         # Gráficos
@@ -117,29 +119,29 @@ def aplicar_ecualizado(imagen_wavelet, mostrar_resultados=True):
 
         # Imagen del canal seleccionado
         plt.subplot(2, 2, 1)
-        plt.imshow(imagen_wavelet, cmap='gray')
-        plt.title("Canal Seleccionado - Original")
+        plt.imshow(imagen, cmap='gray')
+        plt.title(f"Canal Seleccionado {nombre} - Original")
         plt.axis('off')
 
         # Histograma de la imagen original
         plt.subplot(2, 2, 2)
-        plt.hist(imagen_wavelet.ravel(), bins=256, range=(0, 255), color='blue')
+        plt.hist(imagen.ravel(), bins=256, range=(0, 255), color='blue')
         plt.grid(True, linestyle='--', alpha=0.6)
-        plt.title("Histograma - Canal Original")
+        plt.title(f"Histograma - Canal {nombre} Original")
         plt.xlabel("Intensidad de los píxeles")
         plt.ylabel("Cantidad de píxeles")
 
         # Imagen del canal ecualizado
         plt.subplot(2, 2, 3)
         plt.imshow(canal_ecualizado, cmap='gray')
-        plt.title("Canal Seleccionado - Ecualizado")
+        plt.title(f"Canal Seleccionado {nombre} - Ecualizado")
         plt.axis('off')
 
         # Histograma de la imagen ecualizada
         plt.subplot(2, 2, 4)
         plt.hist(canal_ecualizado.ravel(), bins=256, range=(0, 255), color='blue')
         plt.grid(True, linestyle='--', alpha=0.6)
-        plt.title("Histograma - Canal Ecualizado")
+        plt.title(f"Histograma - Canal {nombre} Ecualizado")
         plt.xlabel("Intensidad de los píxeles")
         plt.ylabel("Cantidad de píxeles")
 

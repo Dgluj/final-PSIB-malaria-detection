@@ -5,13 +5,13 @@ from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
 from src.watershed import binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
-from src.extraccion_de_caracteristicas import construir_base_datos
+from src.extraccion_de_caracteristicas import construir_base_datos_plan_A, construir_base_datos_plan_B
 
 def main():
     imagenes = cargar_imagenes()
-#    print(f"Se cargaron {len(imagenes)} imágenes:")
-#    for nombre in imagenes.keys():
-#        print(f"- {nombre}")
+    print(f"Se cargaron {len(imagenes)} imágenes:")
+    for nombre in imagenes.keys():
+        print(f"- {nombre}")
 
     for nombre, img in imagenes.items():
         # Reducir ruido
@@ -25,7 +25,7 @@ def main():
         # aplicar_fft(canal_seleccionado)
 
         # Aplicar ecualizado
-        canal_ecualizado = aplicar_ecualizado(canal_seleccionado)
+        canal_ecualizado = aplicar_ecualizado(canal_seleccionado, nombre)
 
         #  # Aplicar la Transformada Wavelet
         # canal_ecualizado_wavelet = aplicar_wavelet(canal_ecualizado)
@@ -111,7 +111,7 @@ def main():
         # plt.show()
 
         # Construir base de datos
-        df = construir_base_datos(canal_seleccionado, contornos)
+        df_A = construir_base_datos_plan_A(canal_seleccionado, contornos)
 
         # Mostrar imagen con bounding boxes
         plt.figure(figsize=(10, 10))
@@ -121,25 +121,12 @@ def main():
         plt.show()
 
         # Mostrar DataFrame
-        print("Base de datos de características:")
-        print(df)
-
-        # # Construir base de datos
-        # df = construir_base_datos(canal_seleccionado, contornos)
-
-        # # Mostrar imagen con bounding boxes
-        # plt.figure(figsize=(10, 10))
-        # plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
-        # plt.title("Bounding Boxes")
-        # plt.axis("off")
-        # plt.show()
-
-        # # Mostrar DataFrame
-        # print("Base de datos de características:")
-        # print(df)
+        print("Base de datos de características:", nombre)
+        print(df_A)
 
         # Detenerse después de procesar la primera imagen
-        break
+        if nombre == "5.png":
+            break
 
 if __name__ == "__main__":
     main()
