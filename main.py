@@ -8,7 +8,7 @@ from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas 
 from src.watershed import binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
-from src.extraccion_de_caracteristicas import construir_base_datos_plan_A, construir_base_datos_plan_B
+from src.extraccion_de_caracteristicas import construir_base_datos
 
 def main():
     imagenes = cargar_imagenes()
@@ -114,11 +114,11 @@ def main():
         plt.show()
 
         # Construir base de datos
-        df_A = construir_base_datos_plan_A(canal_seleccionado, contornos)
+        df = construir_base_datos(canal_seleccionado, contornos)
 
         # Mostrar DataFrame
         print("Base de datos de características:", nombre)
-        print(df_A)
+        print(df)
 
         # Detenerse después de procesar la primera imagen
         if nombre == "5.png":
