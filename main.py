@@ -135,11 +135,9 @@ def main():
 
         # Definir los umbrales
         umbrales = {
-            "Área": 100,
+            "Área": 15000,
             "Perímetro": 50,
-            "Relación de aspecto": 1.2,
             "Circularidad": 0.7,
-            "Cantidad de blobs": 3,
             "Contraste": 10,
             "Energía": 0.5,
             "Homogeneidad": 0.6,

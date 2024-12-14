@@ -65,26 +65,16 @@ def calcular_nuevas_caracteristicas(imagen, contorno):
     area = cv2.contourArea(contorno)
     perimetro = cv2.arcLength(contorno, True)
 
-    # Relación de aspecto (ancho/alto)
-    x, y, w, h = cv2.boundingRect(contorno)
-    relacion_aspecto = w / float(h)
-
     # Circularidad
     if perimetro == 0:
         circularidad = 0
     else:
         circularidad = 4 * np.pi * area / (perimetro ** 2)
 
-    # Detectar blobs
-    blobs = blob_log(imagen, max_sigma=30, num_sigma=10, threshold=0.1)
-    cantidad_blobs = len(blobs)
-
     return {
         "Área": area,
         "Perímetro": perimetro,
-        "Relación de aspecto": relacion_aspecto,
         "Circularidad": circularidad,
-        "Cantidad de blobs": cantidad_blobs,
     }
 
 def construir_base_datos(canal_seleccionado, contornos):
@@ -100,7 +90,7 @@ def construir_base_datos(canal_seleccionado, contornos):
     """
     columnas = [
         "ID", "X", "Y", "Width", "Height", 
-        "Área", "Perímetro", "Relación de aspecto", "Circularidad", "Cantidad de blobs", 
+        "Área", "Perímetro", "Circularidad", 
         "Contraste", "Energía", "Homogeneidad", "Cluster Shade", 
         "Cluster Prominencia", "Correlación Haralick", "Entropía"
     ]
@@ -123,9 +113,7 @@ def construir_base_datos(canal_seleccionado, contornos):
                 i, x, y, w, h, 
                 caracteristicas_forma["Área"], 
                 caracteristicas_forma["Perímetro"], 
-                caracteristicas_forma["Relación de aspecto"], 
                 caracteristicas_forma["Circularidad"], 
-                caracteristicas_forma["Cantidad de blobs"], 
                 caracteristicas_glcm["Contraste"], 
                 caracteristicas_glcm["Energía"], 
                 caracteristicas_glcm["Homogeneidad"], 
@@ -163,9 +151,7 @@ def clasificar_celulas(dataframe, umbrales):
         condiciones = [
             fila["Área"] > umbrales.get("Área", 0),
             fila["Perímetro"] > umbrales.get("Perímetro", 0),
-            fila["Relación de aspecto"] > umbrales.get("Relación de aspecto", 0),
             fila["Circularidad"] < umbrales.get("Circularidad", float('inf')),
-            fila["Cantidad de blobs"] > umbrales.get("Cantidad de blobs", 0),
             fila["Contraste"] > umbrales.get("Contraste", 0),
             fila["Energía"] > umbrales.get("Energía", 0),
             fila["Homogeneidad"] > umbrales.get("Homogeneidad", 0),
@@ -175,8 +161,8 @@ def clasificar_celulas(dataframe, umbrales):
             fila["Entropía"] < umbrales.get("Entropía", float('inf'))
         ]
 
-        # Si todas las condiciones se cumplen, la célula está infectada.
-        return 1 if all(condiciones) else 0
+        # Si solo la condición de área se cumple, la célula está infectada.
+        return 1 if condiciones[0] else 0
 
     # Aplicar la clasificación a cada fila del DataFrame
     dataframe["Infectada"] = dataframe.apply(clasificar_infectada, axis=1)
