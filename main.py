@@ -137,14 +137,14 @@ def main():
 
         # Definir los umbrales
         umbrales = {
-            "Área": 12700,
+            "Área": 11000,
             "Perímetro": 400,
             "Circularidad": 0.3, # casi todas mayores asiq no sirve esta 
             "Contraste": 30, # este sirve bastante
             "Energía": 1, # podria servir que no sea tan restrictivo
-            "Homogeneidad": 0.5, # yes muchas de las sanas tienen mayor
+            "Homogeneidad": 0.55, # yes muchas de las sanas tienen mayor
             "Cluster Shade": 1e+12, # que no sea tan restrictivo
-            "Cluster Prominencia": 3e+13,
+            "Cluster Prominencia": 1e+14,
             "Correlación Haralick": 0.996,
             "Entropía": 9.5
         }

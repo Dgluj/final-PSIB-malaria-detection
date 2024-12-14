@@ -176,11 +176,26 @@ def clasificar_celulas(dataframe, umbrales):
         #     #     return 1  # Célula  infectada
         #     else:
         #         return 0
-        # # Evaluar cuántas condiciones se cumplen
-        if sum(condiciones) >= 2:  # Si al menos 2 condiciones se cumplen
+
+
+        # Evaluar cuántas condiciones se cumplen
+        if sum(condiciones) >= 5:  # Si al menos 2 condiciones se cumplen
             return 1  # Célula infectada
         else:
             return 0  # Célula no infectada
+
+        # if ((condiciones[0] or condiciones[1]) and condiciones[2]) :  # Si al menos 2 condiciones se cumplen
+        #         return 1
+        #     # if (condiciones[3] or condiciones[4]):
+        #     #     return 1  # Célula infectada
+        #     # elif (condiciones[6] and condiciones[9]):
+        #     #     return 1
+        #     # elif (condiciones[7] or condiciones[8]):
+        #     #     return 1
+        #     # elif condiciones[5] or condiciones[8]:
+        #     #     return 1
+        # else:
+        #     return 0  # Célula no infectada
 
     # Aplicar la clasificación a cada fila del DataFrame
     dataframe["Infectada"] = dataframe.apply(clasificar_infectada, axis=1)
