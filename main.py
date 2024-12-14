@@ -16,9 +16,10 @@ def main():
     # img, nombre = cargar_imagen_desde_GUI()  # Cuando esté la GUI
     # Por ahora, cargamos una imagen directamente:
     imagenes = cargar_imagenes()
-    # print(f"Se cargaron {len(imagenes)} imágenes:")
-    # for nombre in imagenes.keys():
-    #     print(f"- {nombre}")
+    print(f"Se cargaron {len(imagenes)} imágenes:")
+    for nombre in imagenes.keys():
+        print(f"- {nombre}")
+    df_final = pd.DataFrame()
 
     for nombre, img in imagenes.items(): 
         img_filtered, img_rgb = reducir_ruido(img) # Reducir el ruido y convertir la imagen a RGB
@@ -123,7 +124,7 @@ def main():
         # plt.tight_layout()
         # plt.show()
 
-        # Construir base de datos
+        # Construir base de datos completa para cada imagen
         df = construir_base_datos(canal_seleccionado, contornos)
 
         # Mostrar DataFrame
@@ -148,18 +149,33 @@ def main():
             "Entropía": 9.5
         }
 
-        # Obtener el DataFrame final
-        df_final = clasificacion_final(df, umbrales)
-        print(df_final)
-        pd.set_option('display.max_columns', None)
+        # Obtener el DataFrame final balanceado
+        df_infectada_sana = clasificacion_final(df, umbrales)
         
-        # Dibujar los bounding boxes con los textos en la imagen
-        img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img, df_final)
+        # Agregar la columna "Imagen" con el nombre de la imagen
+        df_infectada_sana["Imagen"] = nombre
 
+        # Reorganizar las columnas para que "Imagen" sea la primera
+        columnas = ["Imagen"] + [col for col in df_infectada_sana.columns if col != "Imagen"]
+        df_infectada_sana = df_infectada_sana[columnas]
+        print(df_infectada_sana)
+
+        pd.set_option('display.max_columns', None)
+
+        # Dibujar los bounding boxes con los textos en la imagen
+        img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
+        
         # Mostrar la imagen con los bounding boxes finales
-        cv2.imshow("Imagen con Bounding Boxes", img_con_bboxes)
+        cv2.imshow("Bounding Boxes clasificados para imagen: {nombre}", img_con_bboxes)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+        # Concatenar el DataFrame actual al DataFrame final
+        df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
+    
+    # Imprimir el DataFrame final
+    print("DataFrame Final:")
+    print(df_final)
 
 if __name__ == "__main__":
     main()

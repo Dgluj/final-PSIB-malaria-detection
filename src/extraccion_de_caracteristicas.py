@@ -181,6 +181,20 @@ def clasificar_celulas(dataframe, umbrales):
     dataframe["Infectada"] = dataframe.apply(clasificar_infectada, axis=1)
     return dataframe
 
+def contar_celulas(dataframe):
+    """
+    Cuenta el número de células infectadas y no infectadas en el DataFrame.
+
+    Args:
+        dataframe (pandas.DataFrame): DataFrame con la columna "Infectada".
+
+    Returns:
+        tuple: (num_infectadas, num_sanas)
+    """
+    num_infectadas = (dataframe["Infectada"] == 1).sum()
+    num_sanas = (dataframe["Infectada"] == 0).sum()
+    return num_infectadas, num_sanas
+
 def clasificacion_final(dataframe, umbrales):
     """
     Realiza la clasificación final de las células y genera un DataFrame balanceado con células infectadas y no infectadas.
@@ -195,19 +209,20 @@ def clasificacion_final(dataframe, umbrales):
     # Clasificar las células
     dataframe = clasificar_celulas(dataframe, umbrales)
 
-    # Filtrar células infectadas y no infectadas
+    # Contar células infectadas y no infectadas
+    num_infectadas, num_sanas = contar_celulas(dataframe)
+
+    # Crear un DataFrame balanceado
     infectadas = dataframe[dataframe["Infectada"] == 1]
-    no_infectadas = dataframe[dataframe["Infectada"] == 0]
 
-    # Verificar si hay suficientes células no infectadas para igualar el número de células infectadas
-    if len(no_infectadas) >= len(infectadas):
-        # Seleccionar una cantidad aleatoria de no infectadas igual al número de infectadas
-        no_infectadas_sample = no_infectadas.sample(n=len(infectadas), random_state=None)
+    if num_sanas >= num_infectadas:
+        # Seleccionar una cantidad aleatoria de sanas igual al número de infectadas
+        sanas_sample = dataframe[dataframe["Infectada"] == 0].sample(n=num_infectadas, random_state=None)
     else:
-        # Si no hay suficientes células no infectadas, tomar todas las células no infectadas
-        no_infectadas_sample = no_infectadas
-
-    # Concatenar los dos grupos
-    dataframe_final = pd.concat([infectadas, no_infectadas_sample]).reset_index(drop=True)
+        # Si no hay suficientes células no infectadas, tomar todas las células sanas (no debería pasar, pero jugando con los umbrales si)
+        sanas_sample = dataframe[dataframe["Infectada"] == 0]
+    
+    # Crear el DataFrame balanceado concatenando las filas de infectadas y las seleccionadas de no infectadas
+    dataframe_final = pd.concat([infectadas, sanas_sample]).reset_index(drop=True)
 
     return dataframe_final
