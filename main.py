@@ -132,5 +132,9 @@ def main():
         # if nombre == "5.png":
         #     break
 
+
+        # ELEGIR DE CADA DF LA MISMA CANT INF NO INF Y APPENDEAR
+    
+
 if __name__ == "__main__":
     main()

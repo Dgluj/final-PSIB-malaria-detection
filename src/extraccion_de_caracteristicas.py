@@ -53,3 +53,6 @@ def construir_base_datos(canal_seleccionado, contornos):
 
     df = pd.DataFrame(data, columns=columnas)
     return df
+
+# Seleccion
+# Quedarnos
