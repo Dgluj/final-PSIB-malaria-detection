@@ -151,31 +151,36 @@ def clasificar_celulas(dataframe, umbrales):
         condiciones = [
             fila["Área"] > umbrales.get("Área", 0),
             fila["Perímetro"] > umbrales.get("Perímetro", 0),
-            fila["Circularidad"] < umbrales.get("Circularidad", 0),
-            fila["Contraste"] > umbrales.get("Contraste", 0),
-            fila["Energía"] > umbrales.get("Energía", 0),
-            fila["Homogeneidad"] < umbrales.get("Homogeneidad", 0),
-            fila["Cluster Shade"] > umbrales.get("Cluster Shade", 0),
-            fila["Cluster Prominencia"] > umbrales.get("Cluster Prominencia",0),
-            fila["Correlación Haralick"] < umbrales.get("Correlación Haralick", 0),
-            fila["Entropía"] > umbrales.get("Entropía", 0)
+            fila["Circularidad"] < umbrales.get("Circularidad", 0), # Un valor de circularidad cercano a 1 (todos son menores a 1) indica que la forma es más circular
+            fila["Contraste"] > umbrales.get("Contraste", 0), # Las infectadas tienen mayor contraste
+            fila["Energía"] > umbrales.get("Energía", 0), # Tienen mayor energia
+            fila["Homogeneidad"] < umbrales.get("Homogeneidad", 0), # Son menos homogeneas
+            fila["Cluster Shade"] > umbrales.get("Cluster Shade", 0), # Un valor bajo sugiere una textura más suave o uniforme.
+            fila["Cluster Prominencia"] > umbrales.get("Cluster Prominencia",0), # Un valor bajo sugiere que las intensidades de los píxeles son más homogéneas y no presentan contrastes marcados.
+            fila["Correlación Haralick"] < umbrales.get("Correlación Haralick", 0), # Un valor bajo indica que la relación entre los valores de los píxeles vecinos es débil o aleatoria, lo que sugiere una textura más caótica o menos predecible.
+            fila["Entropía"] > umbrales.get("Entropía", 0) # mayor desorden en enfermas
         ]
 
-        # Evaluar las condiciones generales
-        if all(condiciones):  # Si todas las condiciones se cumplen
+        # # Evaluar las condiciones generales
+        # if all(condiciones):  # Si todas las condiciones se cumplen
+        #     return 1  # Célula infectada
+        # else:
+        #     # Verificar si solo la condición de área se cumple, lo que puede ser una indicación de infección
+        #     if condiciones[0]:  # Si solo el área cumple
+        #         return 1  # Célula infectada, aunque no se cumplan otras condiciones
+        #     # elif condiciones[1]:
+        #     #     return 1  # Célula  infectada
+        #     # elif condiciones[2]:
+        #     #     return 1  # Célula  infectada
+        #     # elif condiciones[9]:
+        #     #     return 1  # Célula  infectada
+        #     else:
+        #         return 0
+        # # Evaluar cuántas condiciones se cumplen
+        if sum(condiciones) >= 2:  # Si al menos 2 condiciones se cumplen
             return 1  # Célula infectada
         else:
-            # Verificar si solo la condición de área se cumple, lo que puede ser una indicación de infección
-            if condiciones[0]:  # Si solo el área cumple
-                return 1  # Célula infectada, aunque no se cumplan otras condiciones
-            # elif condiciones[1]:
-            #     return 1  # Célula  infectada
-            # elif condiciones[2]:
-            #     return 1  # Célula  infectada
-            # elif condiciones[9]:
-            #     return 1  # Célula  infectada
-            else:
-                return 0
+            return 0  # Célula no infectada
 
     # Aplicar la clasificación a cada fila del DataFrame
     dataframe["Infectada"] = dataframe.apply(clasificar_infectada, axis=1)

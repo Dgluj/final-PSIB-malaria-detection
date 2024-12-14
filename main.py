@@ -137,13 +137,13 @@ def main():
 
         # Definir los umbrales
         umbrales = {
-            "Área": 12800,
+            "Área": 12700,
             "Perímetro": 400,
-            "Circularidad": 0.88,
-            "Contraste": 30,
-            "Energía": 0.12,
-            "Homogeneidad": 0.6,
-            "Cluster Shade": 3e+11,
+            "Circularidad": 0.3, # casi todas mayores asiq no sirve esta 
+            "Contraste": 30, # este sirve bastante
+            "Energía": 1, # podria servir que no sea tan restrictivo
+            "Homogeneidad": 0.5, # yes muchas de las sanas tienen mayor
+            "Cluster Shade": 1e+12, # que no sea tan restrictivo
             "Cluster Prominencia": 3e+13,
             "Correlación Haralick": 0.996,
             "Entropía": 9.5
@@ -165,8 +165,11 @@ def main():
         # Dibujar los bounding boxes con los textos en la imagen
         img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
         
-        # Mostrar la imagen con los bounding boxes finales
-        cv2.imshow("Bounding Boxes clasificados para imagen: {nombre}", img_con_bboxes)
+        # Agregar título a la ventana de visualización
+        titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
+
+        # Mostrar la imagen con los bounding boxes y el título en la ventana
+        cv2.imshow(titulo_ventana, img_con_bboxes)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
