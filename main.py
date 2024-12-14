@@ -6,6 +6,7 @@ from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas, binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
 from src.extraccion_de_caracteristicas import construir_base_datos, clasificacion_final
+from src.utils import dibujar_bounding_boxes_en_identificadas
 
 def main():
     # Cargar una imagen a través de la futura interfaz gráfica (placeholder):
@@ -151,7 +152,14 @@ def main():
         # Obtener el DataFrame final
         df_final = clasificacion_final(df, umbrales)
         print(df_final)
+        
+        # Dibujar los bounding boxes con los textos en la imagen
+        img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img, df_final)
 
+        # Mostrar la imagen con los bounding boxes finales
+        cv2.imshow("Imagen con Bounding Boxes", img_con_bboxes)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
