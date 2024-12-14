@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas, binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
-from src.extraccion_de_caracteristicas import construir_base_datos
+from src.extraccion_de_caracteristicas import construir_base_datos, clasificacion_final
 
 def main():
     # Cargar una imagen a través de la futura interfaz gráfica (placeholder):
@@ -132,9 +132,26 @@ def main():
         # if nombre == "5.png":
         #     break
 
+        # Definir los umbrales
+        umbrales = {
+            "Área": 100,
+            "Perímetro": 50,
+            "Relación de aspecto": 1.2,
+            "Circularidad": 0.7,
+            "Cantidad de blobs": 3,
+            "Contraste": 10,
+            "Energía": 0.5,
+            "Homogeneidad": 0.6,
+            "Cluster Shade": 0.2,
+            "Cluster Prominencia": 0.5,
+            "Correlación Haralick": 0.2,
+            "Entropía": 5
+        }
 
-        # ELEGIR DE CADA DF LA MISMA CANT INF NO INF Y APPENDEAR
-    
+        # Obtener el DataFrame final
+        df_final = clasificacion_final(df, umbrales)
+        print(df_final)
+
 
 if __name__ == "__main__":
     main()
