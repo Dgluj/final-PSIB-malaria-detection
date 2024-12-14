@@ -16,7 +16,8 @@ def dibujar_bounding_boxes_en_identificadas(img, dataframe):
     """
     # Recorrer cada fila del DataFrame
     for _, fila in dataframe.iterrows():
-        x, y, w, h = fila["X"], fila["Y"], fila["Width"], fila["Height"]
+        x, y, w, h = int(fila["X"]), int(fila["Y"]), int(fila["Width"]), int(fila["Height"])
+        
         # Determinar color y texto según la clasificación
         if fila["Infectada"] == 1:
             color = (0, 0, 255)  # Rojo para infectada

@@ -151,18 +151,31 @@ def clasificar_celulas(dataframe, umbrales):
         condiciones = [
             fila["Área"] > umbrales.get("Área", 0),
             fila["Perímetro"] > umbrales.get("Perímetro", 0),
-            fila["Circularidad"] < umbrales.get("Circularidad", float('inf')),
+            fila["Circularidad"] < umbrales.get("Circularidad", 0),
             fila["Contraste"] > umbrales.get("Contraste", 0),
             fila["Energía"] > umbrales.get("Energía", 0),
-            fila["Homogeneidad"] > umbrales.get("Homogeneidad", 0),
-            fila["Cluster Shade"] < umbrales.get("Cluster Shade", float('inf')),
-            fila["Cluster Prominencia"] < umbrales.get("Cluster Prominencia", float('inf')),
-            fila["Correlación Haralick"] > umbrales.get("Correlación Haralick", 0),
-            fila["Entropía"] < umbrales.get("Entropía", float('inf'))
+            fila["Homogeneidad"] < umbrales.get("Homogeneidad", 0),
+            fila["Cluster Shade"] > umbrales.get("Cluster Shade", 0),
+            fila["Cluster Prominencia"] > umbrales.get("Cluster Prominencia",0),
+            fila["Correlación Haralick"] < umbrales.get("Correlación Haralick", 0),
+            fila["Entropía"] > umbrales.get("Entropía", 0)
         ]
 
-        # Si solo la condición de área se cumple, la célula está infectada.
-        return 1 if condiciones[0] else 0
+        # Evaluar las condiciones generales
+        if all(condiciones):  # Si todas las condiciones se cumplen
+            return 1  # Célula infectada
+        else:
+            # Verificar si solo la condición de área se cumple, lo que puede ser una indicación de infección
+            if condiciones[0]:  # Si solo el área cumple
+                return 1  # Célula infectada, aunque no se cumplan otras condiciones
+            # elif condiciones[1]:
+            #     return 1  # Célula  infectada
+            # elif condiciones[2]:
+            #     return 1  # Célula  infectada
+            # elif condiciones[9]:
+            #     return 1  # Célula  infectada
+            else:
+                return 0
 
     # Aplicar la clasificación a cada fila del DataFrame
     dataframe["Infectada"] = dataframe.apply(clasificar_infectada, axis=1)
@@ -186,11 +199,15 @@ def clasificacion_final(dataframe, umbrales):
     infectadas = dataframe[dataframe["Infectada"] == 1]
     no_infectadas = dataframe[dataframe["Infectada"] == 0]
 
-    # Seleccionar una cantidad aleatoria de no infectadas igual al número de infectadas
-    no_infectadas_sample = no_infectadas.sample(n=len(infectadas), random_state=42)
+    # Verificar si hay suficientes células no infectadas para igualar el número de células infectadas
+    if len(no_infectadas) >= len(infectadas):
+        # Seleccionar una cantidad aleatoria de no infectadas igual al número de infectadas
+        no_infectadas_sample = no_infectadas.sample(n=len(infectadas), random_state=None)
+    else:
+        # Si no hay suficientes células no infectadas, tomar todas las células no infectadas
+        no_infectadas_sample = no_infectadas
 
     # Concatenar los dos grupos
     dataframe_final = pd.concat([infectadas, no_infectadas_sample]).reset_index(drop=True)
 
     return dataframe_final
-

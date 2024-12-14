@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
@@ -135,21 +136,22 @@ def main():
 
         # Definir los umbrales
         umbrales = {
-            "Área": 15000,
-            "Perímetro": 50,
-            "Circularidad": 0.7,
-            "Contraste": 10,
-            "Energía": 0.5,
+            "Área": 12800,
+            "Perímetro": 400,
+            "Circularidad": 0.88,
+            "Contraste": 30,
+            "Energía": 0.12,
             "Homogeneidad": 0.6,
-            "Cluster Shade": 0.2,
-            "Cluster Prominencia": 0.5,
-            "Correlación Haralick": 0.2,
-            "Entropía": 5
+            "Cluster Shade": 3e+11,
+            "Cluster Prominencia": 3e+13,
+            "Correlación Haralick": 0.996,
+            "Entropía": 9.5
         }
 
         # Obtener el DataFrame final
         df_final = clasificacion_final(df, umbrales)
         print(df_final)
+        pd.set_option('display.max_columns', None)
         
         # Dibujar los bounding boxes con los textos en la imagen
         img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img, df_final)
