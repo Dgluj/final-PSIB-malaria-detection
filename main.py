@@ -19,6 +19,8 @@ def main():
     print(f"Se cargaron {len(imagenes)} imágenes:")
     for nombre in imagenes.keys():
         print(f"- {nombre}")
+    
+    # Inicializo el DataFrame final
     df_final = pd.DataFrame()
 
     for nombre, img in imagenes.items(): 
@@ -160,25 +162,34 @@ def main():
         df_infectada_sana = df_infectada_sana[columnas]
         print(df_infectada_sana)
 
+        # Para que se visualicen todas las columnas de la Tabla
         pd.set_option('display.max_columns', None)
 
-        # Dibujar los bounding boxes con los textos en la imagen
+        # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
         img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
         
-        # Agregar título a la ventana de visualización
+        # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
         titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
-
-        # Mostrar la imagen con los bounding boxes y el título en la ventana
         cv2.imshow(titulo_ventana, img_con_bboxes)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-        # Concatenar el DataFrame actual al DataFrame final
+        # Concatenar el DataFrame de infectadas y sanas al DataFrame final
         df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
     
     # Imprimir el DataFrame final
     print("DataFrame Final:")
     print(df_final)
+
+
+
+    X = df_final.copy() # copio todo el dataframe
+    y = X.Infectada # asigno en el vector y sólo la columna "output"
+    del X['Infectada'] # elimino la columna output del vector X que sólo tiene que tener la data de los features
+    type(X)
+    type(y)
+    cantidad_registros = len(X)
+    
 
 if __name__ == "__main__":
     main()
