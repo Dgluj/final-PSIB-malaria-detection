@@ -40,41 +40,7 @@ def main():
         # Rellenar las células
         img_rellena = rellenar_celulas(img_morfo)
 
-        # Aplicar ecualizado
-        # canal_ecualizado = aplicar_ecualizado(canal_seleccionado, nombre)
-
-        #  # Aplicar la Transformada Wavelet
-        # canal_ecualizado_wavelet = aplicar_wavelet(canal_ecualizado)
-
-        # # Mostrar el resultado
-        # plt.figure(figsize=(15, 5))
-        # plt.subplot(1, 3, 1)
-        # plt.imshow(img)
-        # plt.title(f"Original: {nombre}")
-        # plt.axis("off")
-
-        # plt.subplot(1, 3, 2)
-        # plt.imshow(canal_seleccionado, cmap="gray")
-        # plt.title("Canal Seleccionado")
-        # plt.axis("off")
-
-        # plt.subplot(1, 3, 3)
-        # plt.imshow(imagen_wavelet, cmap="gray")
-        # plt.title("Wavelet (LL)")
-        # plt.axis("off")
-
-        # plt.tight_layout()
-        # plt.show()
-
-        # Binarizar el canal seleccionado preprocesado (imagen_wavelet)
-        #img_binarizada = binarizar(canal_ecualizado, 60)
-        #img_binarizada = binarizar_auto(canal_ecualizado) #checkinggggggggggg
-        #img_binarizada = img_binarizada.astype(np.uint8)
-
-        #img_dilatada, img_cerrada = aplicar_dilatacion_y_erosion(img_binarizada)
-
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
-        # img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga
         img_ws, resultados_intermedios = aplicar_watershed(img_rellena, level=40) # No achicar mas xq se caga
 
         # # Mostrar los resultados intermedios
@@ -105,26 +71,6 @@ def main():
         # plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
         # plt.title("Bounding Boxes" + nombre)
         # plt.axis("off")
-        # plt.show()
-
-        # # Llamar al pipeline de segmentación y bounding boxes de recortes
-        # img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_max=20000, umbral_area_min=5000)
-
-        # # Mostrar la comparación entre los bounding boxes previos y los nuevos
-        # fig, axs = plt.subplots(1, 2, figsize=(15, 7))
-
-        # # Mostrar imagen con bounding boxes previos
-        # axs[0].imshow(cv2.cvtColor(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB), cv2.COLOR_BGR2RGB))
-        # axs[0].set_title("Bounding Boxes Previos" + nombre)
-        # axs[0].axis('off')
-
-        # # Mostrar imagen con nuevos bounding boxes
-        # axs[1].imshow(cv2.cvtColor(img_bounding_boxes_final, cv2.COLOR_BGR2RGB))
-        # axs[1].set_title("Nuevos Bounding Boxes" + nombre)
-        # axs[1].axis('off')
-
-        # # Ajustar el layout y mostrar
-        # plt.tight_layout()
         # plt.show()
 
         # Construir base de datos completa para cada imagen

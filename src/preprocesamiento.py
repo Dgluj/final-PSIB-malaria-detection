@@ -51,13 +51,13 @@ def seleccionar_canal_mayor_contraste(canal_rojo, canal_verde, canal_azul):
     contraste_azul = np.std(canal_azul)
 
     if contraste_azul >= max(contraste_rojo, contraste_verde):
-        print("Canal Azul seleccionado (mayor contraste).")
+        #print("Canal Azul seleccionado (mayor contraste).")
         return canal_azul
     elif contraste_verde >= max(contraste_rojo, contraste_azul):
-        print("Canal Verde seleccionado (mayor contraste).")
+        #print("Canal Verde seleccionado (mayor contraste).")
         return canal_verde
     else:
-        print("Canal Rojo seleccionado (mayor contraste).")
+        #print("Canal Rojo seleccionado (mayor contraste).")
         return canal_rojo
     
 def aplicar_fft(canal):
