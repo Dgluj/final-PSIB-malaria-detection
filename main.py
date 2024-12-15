@@ -181,6 +181,8 @@ def main():
     
     # Acceder directamente al modelo desde el diccionario 'modelos'
     mejor_modelo = modelos[nombre_mejor_modelo]
+
+    print("El type del mejor modelo es", type(mejor_modelo))
     
     # Guardar el modelo usando joblib
     joblib.dump(mejor_modelo, "mejor_modelo.pkl")

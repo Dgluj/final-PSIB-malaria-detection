@@ -19,8 +19,8 @@ from src.seleccion_modelo import mostrar_classification_reports, comparar_modelo
 
 # Funciones principales:
 # Esta es una función que hará todo el procesamiento de la imagen
-def procesar_imagen_con_modelo(self, img):
-    if self.mejor_modelo is None:
+def procesar_imagen_con_modelo(mejor_modelo, img):
+    if mejor_modelo is None:
         print("No se cargó ningún modelo. Por favor, revisa la carga del modelo.")
         return None, None
     
@@ -38,6 +38,6 @@ def procesar_imagen_con_modelo(self, img):
     df = construir_base_datos(canal_seleccionado, contornos)
     X = df.drop(columns=["Imagen","ID"]).copy() 
     X = X.values
-    predicciones = self.mejor_modelo.predict(X)
+    predicciones = mejor_modelo.predict(X)
 
     return img_bounding_boxes, predicciones  # Devuelve la imagen con las cajas y el DataFrame
