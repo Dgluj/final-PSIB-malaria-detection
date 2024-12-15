@@ -237,7 +237,7 @@ def clasificacion_final(dataframe, umbrales):
 
     if num_sanas >= num_infectadas:
         # Seleccionar una cantidad aleatoria de sanas igual al número de infectadas
-        sanas_sample = dataframe[dataframe["Infectada"] == 0].sample(n=num_infectadas, random_state=None)
+        sanas_sample = dataframe[dataframe["Infectada"] == 0].sample(n=num_infectadas, random_state=0)
     else:
         # Si no hay suficientes células no infectadas, tomar todas las células sanas (no debería pasar, pero jugando con los umbrales si)
         sanas_sample = dataframe[dataframe["Infectada"] == 0]
