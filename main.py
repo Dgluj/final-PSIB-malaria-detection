@@ -165,7 +165,36 @@ def main():
     mejor_modelo = seleccionar_mejor_modelo(resultados_comparacion)
 
     # INTERFAZ GRAFICA
-    # Meterle el mejor_modelo
-    
+
+    # Carga Imagen
+    # img, nombre = cargar_imagen_desde_GUI()  # Cuando esté la GUI
+
+    # Procesar Imagen
+"""
+        img_filtered_GUI, img_rgb_GUI = reducir_ruido(img) # Reducir el ruido y convertir la imagen a RGB
+        canal_rojo_GUI, canal_verde_GUI, canal_azul_GUI = separar_canales(img_rgb_GUI) # Separar los canales de la imagen filtrada
+        canal_seleccionado_GUI = seleccionar_canal_mayor_contraste(canal_rojo_GUI, canal_verde_GUI, canal_azul_GUI)
+
+        img_binarizada_GUI = binarizar_con_kmeans(canal_seleccionado_GUI) # Binarizar la imagen del canal de mayor contraste usando KMeans
+        img_mediana_GUI = aplicar_filtro_mediana(img_binarizada_GUI) # Aplicar filtro de mediana para suavizar la imagen binarizada
+        img_morfo_GUI = aplicar_operaciones_morfologicas(img_mediana_GUI) # Aplicar operaciones morfológicas (dilatación y erosión)
+
+        img_rellena_GUI = rellenar_celulas(img_morfo_GUI)
+        img_ws_GUI, resultados_intermedios_GUI = aplicar_watershed(_GUI, level=40) # No achicar mas xq se caga
+        contornos_GUI, _ = cv2.findContours(img_ws_GUI, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        img_bounding_boxes_GUI = dibujar_bounding_boxes(canal_seleccionado_GUI, contornos_GUI, color=(0, 255, 0), grosor=1, umbral_area_min=5000)
+        df_GUI = construir_base_datos(canal_seleccionado_GUI, contornos_GUI)
+        print("Base de datos de características:", nombre)
+        print(df_GUI)
+
+        # Quedarnos con un X que sirva para que el mejor_modelo prediga solo (NO SE SI SE TIENE QUE ENTRENAR TMB CON ESTA?????????)
+        X_GUI = df_GUI.drop(columns=["Imagen","ID"]).copy() 
+        X_GUI = X_GUI.values
+"""
+    # Meterle el mejor_modelo y el X_GUI al GUI a traves de alguna funcion de interfaz_grafica.py 
+
+    # Que directo en interfaz_grafica.py se den los pasos para mostrar la imagen con los bb bien. 
+
+
 if __name__ == "__main__":
     main()
