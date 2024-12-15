@@ -145,8 +145,20 @@ def main():
     y = y.values  # Convierte la columna objetivo
     
     # División, entrenamiento y evaluación
-    modelos, resultados, X_test, y_test = evaluar_modelos(X, y)
-   
+    modelos, resultados, X_test, y_test = evaluar_modelos(X, y) 
+    """
+    El type de modelos es <class 'dict'>
+    Los modelos de evaluar_modelos son: {'RandomForest': RandomForestClassifier(max_depth=3, random_state=0), 'SVM': SVC(random_state=0)}     
+    El type de resultados es <class 'dict'>
+    Los resultados de evaluar_modelos son: {'RandomForest':     Reales  Predichas..... 'SVM':     Reales  Predichas.....}
+    """
+
+    print("El type de modelos es", type(modelos))
+    print("Los modelos de evaluar_modelos son:", modelos)
+
+    print("El type de resultados es", type(resultados))
+    print("Los resultados de evaluar_modelos son:",resultados)
+
     # Mostrar matrices de confusión
     mostrar_matrices_confusion(modelos, X_test, y_test, ["No infectada", "Infectada"])      
     # Mostrar los classification report
@@ -165,8 +177,10 @@ def main():
     graficar_curvas_roc(modelos, X_test, y_test)
 
     # Seleccionar el mejor modelo según el accuracy (o cualquier otra métrica relevante)
-    mejor_modelo = seleccionar_mejor_modelo(resultados_comparacion)
-    print(mejor_modelo)
+    nombre_mejor_modelo = seleccionar_mejor_modelo(resultados_comparacion)
+    
+    # Acceder directamente al modelo desde el diccionario 'modelos'
+    mejor_modelo = modelos[nombre_mejor_modelo]
     
     # Guardar el modelo usando joblib
     joblib.dump(mejor_modelo, "mejor_modelo.pkl")
