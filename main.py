@@ -8,6 +8,7 @@ from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_can
 from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtrar_celulas_infectadas, binarizar, binarizar_auto, aplicar_watershed, aplicar_dilatacion_y_erosion, dibujar_bounding_boxes, procesar_recortes_y_watershed, segmentar_recortes
 from src.extraccion_de_caracteristicas import construir_base_datos, clasificacion_final
 from src.utils import dibujar_bounding_boxes_en_identificadas
+from src.entrenamiento_modelos import dividir_datos, evaluar_modelos, mostrar_matrices_confusion
 
 def main():
     # Cargar una imagen a través de la futura interfaz gráfica (placeholder):
@@ -76,23 +77,23 @@ def main():
         # img_ws, resultados_intermedios = aplicar_watershed(img_cerrada, level=40) # No achicar mas xq se caga
         img_ws, resultados_intermedios = aplicar_watershed(img_rellena, level=40) # No achicar mas xq se caga
 
-        # Mostrar los resultados intermedios
-        fig, ax = plt.subplots(2, 2, figsize=(10, 10))
+        # # Mostrar los resultados intermedios
+        # fig, ax = plt.subplots(2, 2, figsize=(10, 10))
 
-        ax[0, 0].imshow(resultados_intermedios['dist_array'], cmap='gray')
-        ax[0, 0].set_title('Transformada de la distancia', fontsize=15)
+        # ax[0, 0].imshow(resultados_intermedios['dist_array'], cmap='gray')
+        # ax[0, 0].set_title('Transformada de la distancia', fontsize=15)
 
-        ax[0, 1].imshow(resultados_intermedios['umbral_array'], cmap='gray')
-        ax[0, 1].set_title('Imagen binaria', fontsize=15)
+        # ax[0, 1].imshow(resultados_intermedios['umbral_array'], cmap='gray')
+        # ax[0, 1].set_title('Imagen binaria', fontsize=15)
 
-        ax[1, 0].imshow(resultados_intermedios['etiquetas_array'], cmap='gray')
-        ax[1, 0].set_title('Etiquetas Watershed', fontsize=15)
+        # ax[1, 0].imshow(resultados_intermedios['etiquetas_array'], cmap='gray')
+        # ax[1, 0].set_title('Etiquetas Watershed', fontsize=15)
 
-        ax[1, 1].imshow(img_ws, cmap='gray')
-        ax[1, 1].set_title('Resultado Watershed', fontsize=15)
+        # ax[1, 1].imshow(img_ws, cmap='gray')
+        # ax[1, 1].set_title('Resultado Watershed', fontsize=15)
 
-        plt.tight_layout()
-        plt.show()
+        # plt.tight_layout()
+        # plt.show()
 
         # Detectar contornos
         contornos, _ = cv2.findContours(img_ws, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -100,11 +101,11 @@ def main():
         # Llamar a la función para dibujar los bounding boxes
         img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1, umbral_area_min=5000)
 
-        plt.figure(figsize=(10, 10))
-        plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
-        plt.title("Bounding Boxes" + nombre)
-        plt.axis("off")
-        plt.show()
+        # plt.figure(figsize=(10, 10))
+        # plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
+        # plt.title("Bounding Boxes" + nombre)
+        # plt.axis("off")
+        # plt.show()
 
         # # Llamar al pipeline de segmentación y bounding boxes de recortes
         # img_bounding_boxes_final = segmentar_recortes(canal_seleccionado, img_ws, contornos, level=30, umbral_area_max=20000, umbral_area_min=5000)
@@ -165,14 +166,14 @@ def main():
         # Para que se visualicen todas las columnas de la Tabla
         pd.set_option('display.max_columns', None)
 
-        # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
-        img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
+        # # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
+        # img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
         
-        # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
-        titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
-        cv2.imshow(titulo_ventana, img_con_bboxes)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
+        # titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
+        # cv2.imshow(titulo_ventana, img_con_bboxes)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         # Concatenar el DataFrame de infectadas y sanas al DataFrame final
         df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
@@ -181,15 +182,22 @@ def main():
     print("DataFrame Final:")
     print(df_final)
 
-
-
-    X = df_final.copy() # copio todo el dataframe
-    y = X.Infectada # asigno en el vector y sólo la columna "output"
-    del X['Infectada'] # elimino la columna output del vector X que sólo tiene que tener la data de los features
-    type(X)
-    type(y)
-    cantidad_registros = len(X)
     
+    # Mantén solo las características relevantes
+    X = df_final.drop(columns=["Imagen","ID", "Infectada"]).copy() # No se si sacar las coordenadas o dejarlas para algun bb final
+    y = df_final["Infectada"]
+
+    type(X) # <class 'pandas.core.frame.DataFrame'>
+    type(y) # <class 'pandas.core.series.Series'>
+
+    # Opcional: convierte a numpy array si no necesitas trabajar con DataFrame
+    X = X.values  # Solo los valores, el modelo no necesita el encabezado ni índices
+    y = y.values  # Convierte la columna objetivo
+    
+    # División, entrenamiento y evaluación
+    modelos, resultados, X_test, y_test = evaluar_modelos(X, y)
+    # Mostrar matrices de confusión
+    mostrar_matrices_confusion(modelos, X_test, y_test, ["No infectada", "Infectada"])        
 
 if __name__ == "__main__":
     main()
