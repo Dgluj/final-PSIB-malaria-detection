@@ -9,6 +9,7 @@ from src.segmentacion import segmentar_kmeans_y_umbral, aplicar_floodfill, filtr
 from src.extraccion_de_caracteristicas import construir_base_datos, clasificacion_final
 from src.utils import dibujar_bounding_boxes_en_identificadas
 from src.entrenamiento_modelos import dividir_datos, evaluar_modelos, mostrar_matrices_confusion
+from src.seleccion_modelo import mostrar_classification_reports, comparar_modelos, graficar_curvas_roc, seleccionar_mejor_modelo
 
 def main():
     # Cargar una imagen a través de la futura interfaz gráfica (placeholder):
@@ -115,11 +116,11 @@ def main():
         # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
         img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
         
-        # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
-        titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
-        cv2.imshow(titulo_ventana, img_con_bboxes)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
+        # titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
+        # cv2.imshow(titulo_ventana, img_con_bboxes)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
 
         # Concatenar el DataFrame de infectadas y sanas al DataFrame final
         df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
@@ -142,8 +143,29 @@ def main():
     
     # División, entrenamiento y evaluación
     modelos, resultados, X_test, y_test = evaluar_modelos(X, y)
+   
     # Mostrar matrices de confusión
-    mostrar_matrices_confusion(modelos, X_test, y_test, ["No infectada", "Infectada"])        
+    mostrar_matrices_confusion(modelos, X_test, y_test, ["No infectada", "Infectada"])      
+    # Mostrar los classification report
+    mostrar_classification_reports(modelos, X_test, y_test, ["No infectada", "Infectada"])
 
+    # SELECCIÓN DEL MODELO
+    # Comparar modelos
+    resultados_comparacion = comparar_modelos(modelos, X, y, cv=5)
+    
+    # Convertir los resultados de comparación a DataFrame y mostrarlos de forma más visual
+    df_comparacion = pd.DataFrame(resultados_comparacion).T
+    print("\nResultados de comparación de modelos:")
+    print(df_comparacion)
+
+    # Graficar curvas ROC
+    graficar_curvas_roc(modelos, X_test, y_test)
+
+    # Seleccionar el mejor modelo según el accuracy (o cualquier otra métrica relevante)
+    mejor_modelo = seleccionar_mejor_modelo(resultados_comparacion)
+
+    # INTERFAZ GRAFICA
+    # Meterle el mejor_modelo
+    
 if __name__ == "__main__":
     main()
