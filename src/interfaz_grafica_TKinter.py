@@ -2,12 +2,18 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinter.ttk import Progressbar
 from PIL import Image, ImageTk
+import joblib
+
 import cv2
 import pandas as pd
 import numpy as np
 import threading
-from src.procesamiento_interfaz import procesar_imagen_con_modelo
+import sys
+import os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.procesamiento_interfaz import procesar_imagen_con_modelo
 
 # Clase:
 class InterfazAnalisisCélulas:
@@ -28,7 +34,7 @@ class InterfazAnalisisCélulas:
         self.boton_cargar.pack()
 
         # Canvas para mostrar la imagen
-        self.canvas = tk.Canvas(root, width=500, height=500, bg="white")
+        self.canvas = tk.Canvas(root, width=700, height=500, bg="white")
         self.canvas.pack()
 
         # Botón para procesar la imagen
@@ -64,7 +70,7 @@ class InterfazAnalisisCélulas:
         # Convertir la imagen a formato compatible con Tkinter
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_pil = Image.fromarray(img_rgb)
-        img_pil = img_pil.resize((500, 500))
+        img_pil = img_pil.resize((700, 500))
         self.imagen_tk = ImageTk.PhotoImage(img_pil)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.imagen_tk)
 
@@ -141,7 +147,7 @@ class InterfazAnalisisCélulas:
 # Función principal para ejecutar la interfaz
 if __name__ == "__main__":
     # Cargar el modelo previamente guardado
-    modelo = np.load("mejor_modelo.npy", allow_pickle=True) # El parámetro allow_pickle=True es necesario si tu objeto (el modelo) es un objeto complejo, como un objeto de un modelo de aprendizaje automático que no es un simple array de números. 
+    modelo = joblib.load("mejor_modelo.pkl")  # Carga correctamente el objeto del modelo
     accuracy = 0.96 # Ejemplo de precisión del modelo
     root = tk.Tk()
     app = InterfazAnalisisCélulas(root, modelo, accuracy)

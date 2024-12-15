@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import joblib
+
 
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, aplicar_fft, aplicar_wavelet, aplicar_ecualizado, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
@@ -80,7 +82,7 @@ def main():
 
         # Mostrar DataFrame
         print("Base de datos de características:", nombre)
-        print(df)
+        #print(df)
 
         # # Detenerse después de procesar la primera imagen
         # if nombre == "5.png":
@@ -109,7 +111,7 @@ def main():
         # Reorganizar las columnas para que "Imagen" sea la primera
         columnas = ["Imagen"] + [col for col in df_infectada_sana.columns if col != "Imagen"]
         df_infectada_sana = df_infectada_sana[columnas]
-        print(df_infectada_sana)
+        #print(df_infectada_sana)
 
         # Para que se visualicen todas las columnas de la Tabla
         pd.set_option('display.max_columns', None)
@@ -127,8 +129,8 @@ def main():
         df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
     
     # Imprimir el DataFrame final
-    print("DataFrame Final:")
-    print(df_final)
+    #print("DataFrame Final:")
+    #print(df_final)
 
     # ENTRENAMIENTO
     # Mantén solo las características relevantes
@@ -157,16 +159,17 @@ def main():
     # Convertir los resultados de comparación a DataFrame y mostrarlos de forma más visual
     df_comparacion = pd.DataFrame(resultados_comparacion).T
     print("\nResultados de comparación de modelos:")
-    print(df_comparacion)
+    #print(df_comparacion)
 
     # Graficar curvas ROC
     graficar_curvas_roc(modelos, X_test, y_test)
 
     # Seleccionar el mejor modelo según el accuracy (o cualquier otra métrica relevante)
     mejor_modelo = seleccionar_mejor_modelo(resultados_comparacion)
+    print(mejor_modelo)
     
-    # Guardar el modelo entrenado en un archivo .npy
-    np.save("mejor_modelo.npy", mejor_modelo)
+    # Guardar el modelo usando joblib
+    joblib.dump(mejor_modelo, "mejor_modelo.pkl")
 
 if __name__ == "__main__":
     main()
