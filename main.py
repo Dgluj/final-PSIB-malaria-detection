@@ -166,14 +166,14 @@ def main():
         # Para que se visualicen todas las columnas de la Tabla
         pd.set_option('display.max_columns', None)
 
-        # # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
-        # img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
+        # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
+        img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
         
-        # # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
-        # titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
-        # cv2.imshow(titulo_ventana, img_con_bboxes)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
+        titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
+        cv2.imshow(titulo_ventana, img_con_bboxes)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
         # Concatenar el DataFrame de infectadas y sanas al DataFrame final
         df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
@@ -182,9 +182,9 @@ def main():
     print("DataFrame Final:")
     print(df_final)
 
-    
+    # ENTRENAMIENTO
     # Mantén solo las características relevantes
-    X = df_final.drop(columns=["Imagen","ID", "Infectada"]).copy() # No se si sacar las coordenadas o dejarlas para algun bb final
+    X = df_final.drop(columns=["Imagen","ID","Infectada"]).copy() # No se si sacar las coordenadas o dejarlas para algun bb final
     y = df_final["Infectada"]
 
     type(X) # <class 'pandas.core.frame.DataFrame'>

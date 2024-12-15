@@ -177,7 +177,6 @@ def clasificar_celulas(dataframe, umbrales):
         #     else:
         #         return 0
 
-
         # Evaluar cuántas condiciones se cumplen
         if sum(condiciones) >= 5:  # Si al menos 2 condiciones se cumplen
             return 1  # Célula infectada
