@@ -20,7 +20,7 @@ def dibujar_bounding_boxes_en_identificadas(img, dataframe):
         
         # Determinar color y texto según la clasificación
         if fila["Infectada"] == 1:
-            color = (0, 0, 255)  # Rojo para infectada
+            color = (255, 0, 0) # Rojo para infectada
             texto = "Infectada"
         else:
             color = (0, 255, 0)  # Verde para sana
