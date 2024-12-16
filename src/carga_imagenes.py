@@ -1,6 +1,6 @@
 import os
 import cv2
-
+# hola
 def cargar_imagenes():
     """
     Carga todas las imágenes de la carpeta 'data/' relativa al repositorio.
