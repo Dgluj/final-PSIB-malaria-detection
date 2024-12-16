@@ -160,7 +160,7 @@ def clasificacion_final(dataframe):
 
     if num_sanas >= num_infectadas:
         # Seleccionar una cantidad aleatoria de sanas igual al número de infectadas
-        sanas_sample = dataframe[dataframe["Infectada"] == 0].sample(n=num_infectadas, random_state=0)
+        sanas_sample = dataframe[dataframe["Infectada"] == 0].sample(n=num_infectadas*3, random_state=0) #que agarre el triple de sanas que de infectadas
     else:
         # Si no hay suficientes células no infectadas, tomar todas las células sanas (no debería pasar, pero jugando con los umbrales si)
         sanas_sample = dataframe[dataframe["Infectada"] == 0]

@@ -1,7 +1,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 import SimpleITK as sitk
 sitk.ProcessObject_SetGlobalWarningDisplay(False) # para eliminar las alertas molestas
 
@@ -36,64 +35,6 @@ def segmentar_kmeans_y_umbral(img, n_clusters=2, umbral=70):
     img_segmentada[(etiquetas != etiqueta_fondo) & (img < umbral)] = 255  # Núcleos blancos
 
     return img_segmentada
-
-def aplicar_floodfill(img_segmentada):
-    """
-    Aplica Flood Fill para rellenar las áreas conectadas a los píxeles blancos rodeados de grises.
-
-    Args:
-        img_segmentada (numpy.ndarray): Imagen segmentada con fondo negro, células grises y núcleos blancos.
-
-    Returns:
-        numpy.ndarray: Imagen con las células infectadas completamente rellenadas.
-    """
-    # Crear una copia de la imagen segmentada
-    img_filled = img_segmentada.copy()
-
-    # Crear máscara para Flood Fill
-    mask = np.zeros((img_segmentada.shape[0] + 2, img_segmentada.shape[1] + 2), dtype=np.uint8)
-
-    # Detectar contornos
-    contours, _ = cv2.findContours((img_segmentada == 255).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    if not contours:
-        print("No se encontraron contornos.")
-        return img_filled
-
-    # Aplicar Flood Fill desde el centro de cada contorno
-    for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cx, cy = x + w // 2, y + h // 2  # Centro del contorno
-        if img_segmentada[cy, cx] == 255:  # Validar que sea blanco
-            cv2.floodFill(img_filled, mask, (cx, cy), 255)
-
-    return img_filled
-
-def filtrar_celulas_infectadas(img_floodfilled, area_minima=2000):
-    """
-    Filtra las células infectadas basándose en el área mínima de los objetos.
-
-    Args:
-        img_floodfilled (numpy.ndarray): Imagen procesada con Flood Fill aplicado.
-        area_minima (int): Área mínima para conservar un objeto.
-
-    Returns:
-        numpy.ndarray: Imagen binaria con las células infectadas filtradas.
-    """
-    # Binarizar la imagen
-    _, img_binarizada = cv2.threshold(img_floodfilled, 129, 255, cv2.THRESH_BINARY)
-
-    # Detectar contornos
-    cnts, _ = cv2.findContours(img_binarizada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Crear una imagen en blanco para los contornos filtrados
-    img_filtrada = np.zeros_like(img_binarizada)
-
-    for c in cnts:
-        if cv2.contourArea(c) > area_minima:  # Filtrar por área mínima
-            cv2.drawContours(img_filtrada, [c], -1, 255, thickness=cv2.FILLED)
-
-    return img_filtrada
 
 def binarizar(imagen, umbral):
     """
