@@ -138,18 +138,6 @@ class InterfazAnalisisCélulas:
         self.etiqueta_infectadas.config(text="Infectadas: 0")
         self.etiqueta_sanas.config(text="Sanas: 0")
 
-    # def mostrar_imagen(self, img, texto=None):
-    #     """
-    #     Muestra una imagen en el canvas con texto opcional.
-    #     """
-    #     img_copy = img.copy()  # Copia para evitar modificaciones accidentales
-    #     if texto:
-    #         cv2.putText(img_copy, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-
-    #     img_pil = Image.fromarray(img_copy).resize((700, 500))
-    #     self.imagen_tk = ImageTk.PhotoImage(img_pil)
-    #     self.canvas.create_image(0, 0, anchor=tk.NW, image=self.imagen_tk)
-
     def mostrar_imagen(self, img):
         """
         Muestra una imagen en el canvas.
