@@ -211,5 +211,5 @@ class InterfazAnalisisCélulas:
 if __name__ == "__main__":
     modelo = joblib.load("mejor_modelo.pkl")
     root = tk.Tk()
-    app = InterfazAnalisisCélulas(root, modelo, 0.95)
+    app = InterfazAnalisisCélulas(root, modelo, 0.97)
     root.mainloop()
