@@ -65,7 +65,7 @@ def main():
         # plt.show()
 
         # Construir base de datos completa para cada imagen
-        df = construir_base_datos(canal_seleccionado, contornos, 5000)
+        df = construir_base_datos(canal_seleccionado, contornos, 4500)
 
         df["Infectada"] = (
             (df["Área"] > 9940) & (df["Área"] < 17300) & 
@@ -155,6 +155,7 @@ def main():
     # Acceder directamente al modelo desde el diccionario 'modelos'
     mejor_modelo = modelos[nombre_mejor_modelo]
 
+    print(mejor_modelo)
     print("El type del mejor modelo es: ", type(mejor_modelo))
     
     # Guardar el mejor modelo usando joblib

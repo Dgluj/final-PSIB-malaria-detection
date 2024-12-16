@@ -34,7 +34,7 @@ def evaluar_modelos(X, y):
     
     # Modelos a entrenar
     modelos = {
-        "RandomForest": RandomForestClassifier(max_depth=3, random_state=0),
+        "RandomForestClassifier": RandomForestClassifier(max_depth=3, random_state=0),
         "SVM": SVC(random_state=0)
     }
     
