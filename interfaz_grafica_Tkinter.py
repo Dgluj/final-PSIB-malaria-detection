@@ -115,6 +115,11 @@ class InterfazAnalisisCélulas:
         self.img_original = cv2.cvtColor(self.img_original, cv2.COLOR_BGR2RGB)
         self.mostrar_imagen(self.img_original)
 
+        # Desbloquear el botón de analizar y reiniciar el estado
+        self.boton_analizar.config(state=tk.NORMAL)
+        self.imagen_procesada = None  # Reiniciar la imagen procesada
+        self.predicciones = None      # Reiniciar predicciones
+
     def mostrar_imagen(self, img, texto=None):
         """
         Muestra una imagen en el canvas con texto opcional.
