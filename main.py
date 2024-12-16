@@ -29,13 +29,7 @@ def main():
         img_binarizada = binarizar_con_kmeans(canal_seleccionado) # Binarizar la imagen del canal de mayor contraste usando KMeans
         img_mediana = aplicar_filtro_mediana(img_binarizada) # Aplicar filtro de mediana para suavizar la imagen binarizada
         img_morfo = aplicar_operaciones_morfologicas(img_mediana) # Aplicar operaciones morfológicas (dilatación y erosión)
-
-        # Morfología cierre morfológico directo
-        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))  # Ajusta el tamaño del kernel según sea necesario
-        # img_closing = cv2.morphologyEx(img_binarizada_mediana, cv2.MORPH_CLOSE, kernel)
-
-        # Rellenar las células
-        img_rellena = rellenar_celulas(img_morfo)
+        img_rellena = rellenar_celulas(img_morfo) # Rellenar las células
 
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
         img_ws, resultados_intermedios = aplicar_watershed(img_rellena, level=40) # No achicar mas xq se caga
@@ -71,46 +65,31 @@ def main():
         # plt.show()
 
         # Construir base de datos completa para cada imagen
-        df = construir_base_datos(canal_seleccionado, contornos)
+        df = construir_base_datos(canal_seleccionado, contornos, 5000)
 
-        # Mostrar DataFrame
-        print("Base de datos de características:", nombre)
-        #print(df)
-
-        # # Detenerse después de procesar la primera imagen
-        # if nombre == "5.png":
-        #     break
-
-        # Definir los umbrales
-        umbrales = {
-            "Área": 11000,
-            "Perímetro": 400,
-            "Circularidad": 0.3, # casi todas mayores asiq no sirve esta 
-            "Contraste": 30, # este sirve bastante
-            "Energía": 1, # podria servir que no sea tan restrictivo
-            "Homogeneidad": 0.55, # yes muchas de las sanas tienen mayor
-            "Cluster Shade": 1e+12, # que no sea tan restrictivo
-            "Cluster Prominencia": 1e+14,
-            "Correlación Haralick": 0.996,
-            "Entropía": 9.5
-        }
-
-        # Obtener el DataFrame final balanceado
-        df_infectada_sana = clasificacion_final(df, umbrales)
+        df["Infectada"] = (
+            (df["Área"] > 9940) & (df["Área"] < 17300) & 
+            (df["Contraste"] > 20) & (df["Contraste"] < 73) & 
+            (df["Homogeneidad"] < 0.527) & 
+            (df["Entropía"] > 9.22) & 
+            (df["Energía"] < 0.27) &
+            (df["Correlación Haralick"] > 0.995) &
+            (df["Circularidad"] > 0.735)
+        ).astype(int)  # Convertir a 0 o 1
         
         # Agregar la columna "Imagen" con el nombre de la imagen
-        df_infectada_sana["Imagen"] = nombre
+        df["Imagen"] = nombre
 
         # Reorganizar las columnas para que "Imagen" sea la primera
-        columnas = ["Imagen"] + [col for col in df_infectada_sana.columns if col != "Imagen"]
-        df_infectada_sana = df_infectada_sana[columnas]
+        columnas = ["Imagen"] + [col for col in df.columns if col != "Imagen"]
+        df = df[columnas]
         #print(df_infectada_sana)
 
         # Para que se visualicen todas las columnas de la Tabla
         pd.set_option('display.max_columns', None)
 
-        # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
-        img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df_infectada_sana)
+        # # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
+        # img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df) # AGREGAR EN INTERFAZ GRAFICA
         
         # # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
         # titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
@@ -118,13 +97,15 @@ def main():
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
+        df_balanceado = clasificacion_final(df)
+
         # Concatenar el DataFrame de infectadas y sanas al DataFrame final
-        df_final = pd.concat([df_final, df_infectada_sana], ignore_index=True)
+        df_final = pd.concat([df_final, df_balanceado], ignore_index=True)
     
     # Imprimir el DataFrame final
-    #print("DataFrame Final:")
-    #print(df_final)
-
+    print("DataFrame Final:")
+    print(df_final)
+    
     # ENTRENAMIENTO
     # Mantén solo las características relevantes
     X = df_final.drop(columns=["Imagen","ID","Infectada"]).copy() # No se si sacar las coordenadas o dejarlas para algun bb final
@@ -145,7 +126,6 @@ def main():
     El type de resultados es <class 'dict'>
     Los resultados de evaluar_modelos son: {'RandomForest':     Reales  Predichas..... 'SVM':     Reales  Predichas.....}
     """
-
     print("El type de modelos es", type(modelos))
     print("Los modelos de evaluar_modelos son:", modelos)
 
@@ -164,7 +144,7 @@ def main():
     # Convertir los resultados de comparación a DataFrame y mostrarlos de forma más visual
     df_comparacion = pd.DataFrame(resultados_comparacion).T
     print("\nResultados de comparación de modelos:")
-    #print(df_comparacion)
+    # print(df_comparacion)
 
     # Graficar curvas ROC
     graficar_curvas_roc(modelos, X_test, y_test)
@@ -175,10 +155,10 @@ def main():
     # Acceder directamente al modelo desde el diccionario 'modelos'
     mejor_modelo = modelos[nombre_mejor_modelo]
 
-    print("El type del mejor modelo es", type(mejor_modelo))
+    print("El type del mejor modelo es: ", type(mejor_modelo))
     
     # Guardar el mejor modelo usando joblib
-    joblib.dump(mejor_modelo, "mejor_modelo.pkl")
+    joblib.dump(mejor_modelo, "mejor_modelo.pkl") #El type del mejor modelo es <class 'sklearn.ensemble._forest.RandomForestClassifier'>
 
 if __name__ == "__main__":
     main()

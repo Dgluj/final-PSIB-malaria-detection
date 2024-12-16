@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 import pandas as pd
-from skimage.feature import graycomatrix, graycoprops, canny, blob_log 
-from skimage.measure import label, regionprops
+from skimage.feature import graycomatrix, graycoprops
 
 def calcular_glcm(imagen):
     """
@@ -77,7 +76,7 @@ def calcular_nuevas_caracteristicas(imagen, contorno):
         "Circularidad": circularidad,
     }
 
-def construir_base_datos(canal_seleccionado, contornos):
+def construir_base_datos(canal_seleccionado, contornos, umbral_area_min=800):
     """
     Construye una base de datos con las características GLCM y las características adicionales de cada célula detectada.
 
@@ -97,108 +96,36 @@ def construir_base_datos(canal_seleccionado, contornos):
     data = []
 
     for i, contorno in enumerate(contornos):
-        x, y, w, h = cv2.boundingRect(contorno)
-        recorte = canal_seleccionado[y:y+h, x:x+w]
+        
+        if (cv2.contourArea(contorno) > umbral_area_min):
+            x, y, w, h = cv2.boundingRect(contorno)
+            recorte = canal_seleccionado[y:y+h, x:x+w]
 
-        # Solo procesar si el recorte no está vacío y tiene valores no nulos
-        if recorte.size > 0 and np.any(recorte):
-            # Calcular características de GLCM
-            caracteristicas_glcm = calcular_glcm(recorte)
+            # Solo procesar si el recorte no está vacío y tiene valores no nulos
+            if recorte.size > 0 and np.any(recorte):
+                # Calcular características de GLCM
+                caracteristicas_glcm = calcular_glcm(recorte)
 
-            # Calcular características adicionales de forma y textura
-            caracteristicas_forma = calcular_nuevas_caracteristicas(canal_seleccionado, contorno)
+                # Calcular características adicionales de forma y textura
+                caracteristicas_forma = calcular_nuevas_caracteristicas(canal_seleccionado, contorno)
 
-            # Agregar las características al dataset
-            data.append([
-                i, x, y, w, h, 
-                caracteristicas_forma["Área"], 
-                caracteristicas_forma["Perímetro"], 
-                caracteristicas_forma["Circularidad"], 
-                caracteristicas_glcm["Contraste"], 
-                caracteristicas_glcm["Energía"], 
-                caracteristicas_glcm["Homogeneidad"], 
-                caracteristicas_glcm["Cluster Shade"], 
-                caracteristicas_glcm["Cluster Prominencia"], 
-                caracteristicas_glcm["Correlación Haralick"], 
-                caracteristicas_glcm["Entropía"]
-            ])
+                # Agregar las características al dataset
+                data.append([
+                    i, x, y, w, h, 
+                    caracteristicas_forma["Área"], 
+                    caracteristicas_forma["Perímetro"], 
+                    caracteristicas_forma["Circularidad"], 
+                    caracteristicas_glcm["Contraste"], 
+                    caracteristicas_glcm["Energía"], 
+                    caracteristicas_glcm["Homogeneidad"], 
+                    caracteristicas_glcm["Cluster Shade"], 
+                    caracteristicas_glcm["Cluster Prominencia"], 
+                    caracteristicas_glcm["Correlación Haralick"], 
+                    caracteristicas_glcm["Entropía"]
+                ])
 
     df = pd.DataFrame(data, columns=columnas)
     return df
-
-def clasificar_celulas(dataframe, umbrales):
-    """
-    Clasifica las células en el DataFrame como infectadas o no, basado en los umbrales.
-
-    Args:
-        dataframe (pandas.DataFrame): DataFrame con las características de las células.
-        umbrales (dict): Diccionario con los umbrales de las características.
-
-    Returns:
-        pandas.DataFrame: DataFrame actualizado con una columna adicional "Infectada".
-    """
-    def clasificar_infectada(fila):
-        """
-        Clasifica una célula como infectada o no, basado en umbrales.
-
-        Args:
-            fila (pandas.Series): Fila del DataFrame con las características de la célula.
-
-        Returns:
-            int: 1 si está infectada, 0 si no.
-        """
-        # Verificar las condiciones para cada característica, considerando si está definida en el diccionario de umbrales.
-        condiciones = [
-            fila["Área"] > umbrales.get("Área", 0),
-            fila["Perímetro"] > umbrales.get("Perímetro", 0),
-            fila["Circularidad"] < umbrales.get("Circularidad", 0), # Un valor de circularidad cercano a 1 (todos son menores a 1) indica que la forma es más circular
-            fila["Contraste"] > umbrales.get("Contraste", 0), # Las infectadas tienen mayor contraste
-            fila["Energía"] > umbrales.get("Energía", 0), # Tienen mayor energia
-            fila["Homogeneidad"] < umbrales.get("Homogeneidad", 0), # Son menos homogeneas
-            fila["Cluster Shade"] > umbrales.get("Cluster Shade", 0), # Un valor bajo sugiere una textura más suave o uniforme.
-            fila["Cluster Prominencia"] > umbrales.get("Cluster Prominencia",0), # Un valor bajo sugiere que las intensidades de los píxeles son más homogéneas y no presentan contrastes marcados.
-            fila["Correlación Haralick"] < umbrales.get("Correlación Haralick", 0), # Un valor bajo indica que la relación entre los valores de los píxeles vecinos es débil o aleatoria, lo que sugiere una textura más caótica o menos predecible.
-            fila["Entropía"] > umbrales.get("Entropía", 0) # mayor desorden en enfermas
-        ]
-
-        # # Evaluar las condiciones generales
-        # if all(condiciones):  # Si todas las condiciones se cumplen
-        #     return 1  # Célula infectada
-        # else:
-        #     # Verificar si solo la condición de área se cumple, lo que puede ser una indicación de infección
-        #     if condiciones[0]:  # Si solo el área cumple
-        #         return 1  # Célula infectada, aunque no se cumplan otras condiciones
-        #     # elif condiciones[1]:
-        #     #     return 1  # Célula  infectada
-        #     # elif condiciones[2]:
-        #     #     return 1  # Célula  infectada
-        #     # elif condiciones[9]:
-        #     #     return 1  # Célula  infectada
-        #     else:
-        #         return 0
-
-        # Evaluar cuántas condiciones se cumplen
-        if sum(condiciones) >= 5:  # Si al menos 2 condiciones se cumplen
-            return 1  # Célula infectada
-        else:
-            return 0  # Célula no infectada
-
-        # if ((condiciones[0] or condiciones[1]) and condiciones[2]) :  # Si al menos 2 condiciones se cumplen
-        #         return 1
-        #     # if (condiciones[3] or condiciones[4]):
-        #     #     return 1  # Célula infectada
-        #     # elif (condiciones[6] and condiciones[9]):
-        #     #     return 1
-        #     # elif (condiciones[7] or condiciones[8]):
-        #     #     return 1
-        #     # elif condiciones[5] or condiciones[8]:
-        #     #     return 1
-        # else:
-        #     return 0  # Célula no infectada
-
-    # Aplicar la clasificación a cada fila del DataFrame
-    dataframe["Infectada"] = dataframe.apply(clasificar_infectada, axis=1)
-    return dataframe
 
 def contar_celulas(dataframe):
     """
@@ -214,19 +141,16 @@ def contar_celulas(dataframe):
     num_sanas = (dataframe["Infectada"] == 0).sum()
     return num_infectadas, num_sanas
 
-def clasificacion_final(dataframe, umbrales):
+def clasificacion_final(dataframe):
     """
     Realiza la clasificación final de las células y genera un DataFrame balanceado con células infectadas y no infectadas.
 
     Args:
         dataframe (pandas.DataFrame): DataFrame con las características de las células.
-        umbrales (dict): Diccionario con los umbrales de las características.
 
     Returns:
         pandas.DataFrame: DataFrame final balanceado con células infectadas y no infectadas.
     """
-    # Clasificar las células
-    dataframe = clasificar_celulas(dataframe, umbrales)
 
     # Contar células infectadas y no infectadas
     num_infectadas, num_sanas = contar_celulas(dataframe)
@@ -242,6 +166,6 @@ def clasificacion_final(dataframe, umbrales):
         sanas_sample = dataframe[dataframe["Infectada"] == 0]
     
     # Crear el DataFrame balanceado concatenando las filas de infectadas y las seleccionadas de no infectadas
-    dataframe_final = pd.concat([infectadas, sanas_sample]).reset_index(drop=True)
+    dataframe_balanceado = pd.concat([infectadas, sanas_sample]).reset_index(drop=True)
 
-    return dataframe_final
+    return dataframe_balanceado
