@@ -86,15 +86,29 @@ class InterfazAnalisisCélulas:
         tk.Button(self.root, text="Cargar Imagen", command=self.cargar_imagen).pack()
         self.canvas = tk.Canvas(self.root, width=700, height=500, bg="white")
         self.canvas.pack()
-        # tk.Button(self.root, text="Analizar Imagen", command=self.analizar_imagen).pack()
+
+        # Boton para analizar la imagen
         self.boton_analizar = tk.Button(self.root, text="Analizar Imagen", command=self.analizar_imagen)
         self.boton_analizar.pack()
+
+        # Barra de progreso
         self.progreso = Progressbar(self.root, orient=tk.HORIZONTAL, length=300, mode="indeterminate")
+        
+        # Etiqueta de exactitud del modelo
         self.etiqueta_accuracy = tk.Label(self.root, text=f"Exactitud del Modelo: {self.accuracy*100:.2f}%")
+        
+        # Botones para guardar resultados
         self.boton_guardar_imagen = tk.Button(self.root, text="Guardar Imagen Procesada", command=self.guardar_imagen, state=tk.DISABLED)
         self.boton_guardar_imagen.pack()
         self.boton_guardar_csv = tk.Button(self.root, text="Guardar Resultados (.csv)", command=self.guardar_csv, state=tk.DISABLED)
         self.boton_guardar_csv.pack()
+
+        # Etiquetas para mostrar el conteo de células
+        self.etiqueta_infectadas = tk.Label(self.root, text="Infectadas: 0", font=("Helvetica", 12), fg="red")
+        self.etiqueta_infectadas.pack()
+        
+        self.etiqueta_sanas = tk.Label(self.root, text="Sanas: 0", font=("Helvetica", 12), fg="green")
+        self.etiqueta_sanas.pack()
 
     def cargar_imagen(self):
         ruta_imagen = filedialog.askopenfilename(filetypes=[("Archivos de imagen", "*.jpg;*.png;*.jpeg")])
@@ -120,15 +134,27 @@ class InterfazAnalisisCélulas:
         self.imagen_procesada = None  # Reiniciar la imagen procesada
         self.predicciones = None      # Reiniciar predicciones
 
-    def mostrar_imagen(self, img, texto=None):
-        """
-        Muestra una imagen en el canvas con texto opcional.
-        """
-        img_copy = img.copy()  # Copia para evitar modificaciones accidentales
-        if texto:
-            cv2.putText(img_copy, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+        # Reiniciar conteos
+        self.etiqueta_infectadas.config(text="Infectadas: 0")
+        self.etiqueta_sanas.config(text="Sanas: 0")
 
-        img_pil = Image.fromarray(img_copy).resize((700, 500))
+    # def mostrar_imagen(self, img, texto=None):
+    #     """
+    #     Muestra una imagen en el canvas con texto opcional.
+    #     """
+    #     img_copy = img.copy()  # Copia para evitar modificaciones accidentales
+    #     if texto:
+    #         cv2.putText(img_copy, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+
+    #     img_pil = Image.fromarray(img_copy).resize((700, 500))
+    #     self.imagen_tk = ImageTk.PhotoImage(img_pil)
+    #     self.canvas.create_image(0, 0, anchor=tk.NW, image=self.imagen_tk)
+
+    def mostrar_imagen(self, img):
+        """
+        Muestra una imagen en el canvas.
+        """
+        img_pil = Image.fromarray(img).resize((700, 500))
         self.imagen_tk = ImageTk.PhotoImage(img_pil)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.imagen_tk)
 
@@ -146,12 +172,13 @@ class InterfazAnalisisCélulas:
             # Procesar imagen con modelo
             self.img_procesada, df = procesar_imagen_con_modelo(self.img_original, self.mejor_modelo)
 
-            # Contar células y mostrar resultados
+            # Contar células y actualizar etiquetas
             num_infectadas, num_sanas = contar_celulas(df)
-            texto = f"Infectadas: {num_infectadas} | Sanas: {num_sanas}"
+            self.etiqueta_infectadas.config(text=f"Infectadas: {num_infectadas}")
+            self.etiqueta_sanas.config(text=f"Sanas: {num_sanas}")
 
             # Mostrar imagen procesada
-            self.mostrar_imagen(self.img_procesada, texto)
+            self.mostrar_imagen(self.img_procesada)
 
             # Guardar resultados
             self.predicciones = df
@@ -196,5 +223,5 @@ class InterfazAnalisisCélulas:
 if __name__ == "__main__":
     modelo = joblib.load("mejor_modelo.pkl")
     root = tk.Tk()
-    app = InterfazAnalisisCélulas(root, modelo, 0.91)
+    app = InterfazAnalisisCélulas(root, modelo, 0.95)
     root.mainloop()

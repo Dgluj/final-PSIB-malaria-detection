@@ -1,6 +1,3 @@
-import cv2
-import numpy as np
-import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -8,17 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-from src.carga_imagenes import cargar_imagenes
-from src.preprocesamiento import (
-    reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, 
-    binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, 
-    rellenar_celulas
-)
-from src.segmentacion import aplicar_watershed
-from src.extraccion_de_caracteristicas import construir_base_datos
-
 # División de los datos en conjuntos de entrenamiento y prueba
-def dividir_datos(X, y, test_size=0.5, random_state=42):
+def dividir_datos(X, y, test_size=0.3, random_state=42):
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
 # Función genérica para entrenar un modelo y devolver un DataFrame con Reales y Predichas
