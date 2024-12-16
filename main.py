@@ -6,9 +6,8 @@ import joblib
 
 from src.carga_imagenes import cargar_imagenes
 from src.preprocesamiento import reducir_ruido, separar_canales, seleccionar_canal_mayor_contraste, binarizar_con_kmeans, aplicar_filtro_mediana, aplicar_operaciones_morfologicas, rellenar_celulas 
-from src.segmentacion import aplicar_watershed, dibujar_bounding_boxes
+from src.segmentacion import aplicar_watershed
 from src.extraccion_de_caracteristicas import construir_base_datos, clasificacion_final
-from src.utils import dibujar_bounding_boxes_en_identificadas
 from src.entrenamiento_modelos import dividir_datos, evaluar_modelos, mostrar_matrices_confusion
 from src.seleccion_modelo import mostrar_classification_reports, comparar_modelos, graficar_curvas_roc, seleccionar_mejor_modelo
 
@@ -34,35 +33,8 @@ def main():
         # Aplicar la transformada de la distancia y Watershed a la imagen completa binaria (img_binarizada)
         img_ws, resultados_intermedios = aplicar_watershed(img_rellena, level=40) # No achicar mas xq se caga
 
-        # # Mostrar los resultados intermedios
-        # fig, ax = plt.subplots(2, 2, figsize=(10, 10))
-
-        # ax[0, 0].imshow(resultados_intermedios['dist_array'], cmap='gray')
-        # ax[0, 0].set_title('Transformada de la distancia', fontsize=15)
-
-        # ax[0, 1].imshow(resultados_intermedios['umbral_array'], cmap='gray')
-        # ax[0, 1].set_title('Imagen binaria', fontsize=15)
-
-        # ax[1, 0].imshow(resultados_intermedios['etiquetas_array'], cmap='gray')
-        # ax[1, 0].set_title('Etiquetas Watershed', fontsize=15)
-
-        # ax[1, 1].imshow(img_ws, cmap='gray')
-        # ax[1, 1].set_title('Resultado Watershed', fontsize=15)
-
-        # plt.tight_layout()
-        # plt.show()
-
         # Detectar contornos
         contornos, _ = cv2.findContours(img_ws, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        # Llamar a la función para dibujar los bounding boxes
-        img_bounding_boxes = dibujar_bounding_boxes(canal_seleccionado, contornos, color=(0, 255, 0), grosor=1, umbral_area_min=5000)
-
-        # plt.figure(figsize=(10, 10))
-        # plt.imshow(cv2.cvtColor(img_bounding_boxes, cv2.COLOR_BGR2RGB))
-        # plt.title("Bounding Boxes" + nombre)
-        # plt.axis("off")
-        # plt.show()
 
         # Construir base de datos completa para cada imagen
         df = construir_base_datos(canal_seleccionado, contornos, 4500)
@@ -83,27 +55,17 @@ def main():
         # Reorganizar las columnas para que "Imagen" sea la primera
         columnas = ["Imagen"] + [col for col in df.columns if col != "Imagen"]
         df = df[columnas]
-        #print(df_infectada_sana)
 
         # Para que se visualicen todas las columnas de la Tabla
         pd.set_option('display.max_columns', None)
 
-        # # Dibujar los bounding boxes con los textos en la imagen con células clasificadas
-        # img_con_bboxes = dibujar_bounding_boxes_en_identificadas(img_rgb, df) # AGREGAR EN INTERFAZ GRAFICA
-        
-        # # Agregar título a la ventana de visualización del Bounding Box con las células para el DataFrame
-        # titulo_ventana = f"Bounding Boxes clasificados para imagen: {nombre}"
-        # cv2.imshow(titulo_ventana, img_con_bboxes)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
-        df_balanceado = clasificacion_final(df)
+        df_desbalanceado = clasificacion_final(df)
 
         # Concatenar el DataFrame de infectadas y sanas al DataFrame final
-        df_final = pd.concat([df_final, df_balanceado], ignore_index=True)
+        df_final = pd.concat([df_final, df_desbalanceado], ignore_index=True)
     
     # Imprimir el DataFrame final
-    print("DataFrame Final:")
+    print("DataFrame Final Desbalanceado:")
     print(df_final)
     
     # ENTRENAMIENTO
